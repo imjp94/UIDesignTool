@@ -302,13 +302,16 @@ func _on_FontStyle_item_selected(index):
 	if not focused_object:
 		return
 
-	var font_style = font_manager.FONT_STYLES[$FontStyle.get_item_text(index)]
 	var dynamic_font = focused_object.get(PROPERTY_FONT)
+	if not dynamic_font:
+		return
+	var font_style = font_manager.FONT_STYLES[$FontStyle.get_item_text(index)]
 	# TODO: Set font weight
 	dynamic_font.size = font_style.size
 	dynamic_font.extra_spacing_char = font_style.letter_spacing
 
-	# TODO: Update FontSize
+	# TODO: Update FontWeight
+	$FontSize.text = str(font_style.size)
 
 	emit_signal("property_edited", PROPERTY_FONT)
 
