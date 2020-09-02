@@ -27,7 +27,6 @@ margin_right = 61.0
 margin_bottom = 22.0
 hint_tooltip = "Font Family"
 size_flags_vertical = 4
-text = "Alata"
 selected = 0
 
 [node name="FontWeight" type="OptionButton" parent="."]
@@ -37,7 +36,6 @@ margin_right = 94.0
 margin_bottom = 22.0
 hint_tooltip = "Font Weight"
 size_flags_vertical = 4
-selected = 0
 
 [node name="FontFamilyLoadButton" type="Button" parent="."]
 margin_left = 98.0
@@ -79,12 +77,22 @@ margin_left = 166.0
 margin_right = 170.0
 margin_bottom = 24.0
 
-[node name="FontSize" type="OptionButton" parent="."]
+[node name="FontSize" type="LineEdit" parent="."]
 margin_left = 174.0
-margin_top = 2.0
-margin_right = 219.0
-margin_bottom = 22.0
+margin_right = 232.0
+margin_bottom = 24.0
 hint_tooltip = "Font Size"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="FontSizePreset" type="OptionButton" parent="FontSize"]
+show_behind_parent = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 27.0
+margin_right = 14.0
+hint_tooltip = "Font Size Presets"
 size_flags_horizontal = 4
 size_flags_vertical = 4
 disabled = true
@@ -92,12 +100,20 @@ text = "16"
 items = [ "8", null, false, 0, null, "9", null, false, 1, null, "10", null, false, 2, null, "11", null, false, 3, null, "12", null, false, 4, null, "14", null, false, 5, null, "16", null, false, 6, null, "18", null, false, 7, null, "24", null, false, 8, null, "30", null, false, 9, null, "36", null, false, 10, null, "48", null, false, 11, null, "60", null, false, 12, null, "72", null, false, 13, null, "96", null, false, 14, null ]
 selected = 6
 __meta__ = {
+"_edit_use_anchors_": false,
 "_editor_description_": ""
 }
 
+[node name="PanelContainer" type="PanelContainer" parent="."]
+self_modulate = Color( 1, 1, 1, 0 )
+margin_left = 236.0
+margin_right = 250.0
+margin_bottom = 24.0
+mouse_filter = 2
+
 [node name="Bold" type="Button" parent="."]
-margin_left = 223.0
-margin_right = 253.0
+margin_left = 254.0
+margin_right = 284.0
 margin_bottom = 24.0
 hint_tooltip = "Bold"
 disabled = true
@@ -109,8 +125,8 @@ __meta__ = {
 }
 
 [node name="Italic" type="Button" parent="."]
-margin_left = 257.0
-margin_right = 287.0
+margin_left = 288.0
+margin_right = 318.0
 margin_bottom = 24.0
 hint_tooltip = "Italic"
 disabled = true
@@ -122,8 +138,8 @@ __meta__ = {
 }
 
 [node name="Underline" type="Button" parent="."]
-margin_left = 291.0
-margin_right = 321.0
+margin_left = 322.0
+margin_right = 352.0
 margin_bottom = 24.0
 hint_tooltip = "Underline
 *Only supported in RichTextLabel"
@@ -136,8 +152,8 @@ __meta__ = {
 }
 
 [node name="FontColor" type="Button" parent="."]
-margin_left = 325.0
-margin_right = 355.0
+margin_left = 356.0
+margin_right = 386.0
 margin_bottom = 24.0
 hint_tooltip = "Font Color"
 icon = ExtResource( 4 )
@@ -176,8 +192,8 @@ __meta__ = {
 }
 
 [node name="Highlight" type="Button" parent="."]
-margin_left = 359.0
-margin_right = 389.0
+margin_left = 390.0
+margin_right = 420.0
 margin_bottom = 24.0
 hint_tooltip = "Highlight Color"
 icon = ExtResource( 8 )
@@ -216,13 +232,13 @@ __meta__ = {
 }
 
 [node name="VSeparator2" type="VSeparator" parent="."]
-margin_left = 393.0
-margin_right = 397.0
+margin_left = 424.0
+margin_right = 428.0
 margin_bottom = 24.0
 
 [node name="AlignLeft" type="Button" parent="."]
-margin_left = 401.0
-margin_right = 431.0
+margin_left = 432.0
+margin_right = 462.0
 margin_bottom = 24.0
 hint_tooltip = "Align left"
 icon = ExtResource( 13 )
@@ -232,8 +248,8 @@ __meta__ = {
 }
 
 [node name="AlignCenter" type="Button" parent="."]
-margin_left = 435.0
-margin_right = 465.0
+margin_left = 466.0
+margin_right = 496.0
 margin_bottom = 24.0
 hint_tooltip = "Align center"
 icon = ExtResource( 12 )
@@ -243,8 +259,8 @@ __meta__ = {
 }
 
 [node name="AlignRight" type="Button" parent="."]
-margin_left = 469.0
-margin_right = 499.0
+margin_left = 500.0
+margin_right = 530.0
 margin_bottom = 24.0
 hint_tooltip = "Align right"
 icon = ExtResource( 14 )
@@ -254,14 +270,14 @@ __meta__ = {
 }
 
 [node name="VSeparator3" type="VSeparator" parent="."]
-margin_left = 503.0
-margin_right = 507.0
+margin_left = 534.0
+margin_right = 538.0
 margin_bottom = 24.0
 
 [node name="FontStyle" type="OptionButton" parent="."]
-margin_left = 511.0
+margin_left = 542.0
 margin_top = 2.0
-margin_right = 604.0
+margin_right = 635.0
 margin_bottom = 22.0
 hint_tooltip = "Font Style"
 size_flags_horizontal = 4
@@ -271,8 +287,8 @@ items = [ "Heading 1", null, false, 0, null, "Heading 2", null, false, 1, null, 
 selected = 0
 
 [node name="FontClear" type="Button" parent="."]
-margin_left = 608.0
-margin_right = 638.0
+margin_left = 639.0
+margin_right = 669.0
 margin_bottom = 24.0
 hint_tooltip = "Clear Font Formatting"
 icon = ExtResource( 9 )
@@ -282,8 +298,8 @@ __meta__ = {
 }
 
 [node name="ColorClear" type="Button" parent="."]
-margin_left = 642.0
-margin_right = 672.0
+margin_left = 673.0
+margin_right = 703.0
 margin_bottom = 24.0
 hint_tooltip = "Clear Color"
 icon = ExtResource( 10 )
@@ -293,8 +309,8 @@ __meta__ = {
 }
 
 [node name="RectSizeRefresh" type="Button" parent="."]
-margin_left = 676.0
-margin_right = 706.0
+margin_left = 707.0
+margin_right = 737.0
 margin_bottom = 24.0
 hint_tooltip = "Refresh Rect Size
 *Force control to recalculate its own rect_size"

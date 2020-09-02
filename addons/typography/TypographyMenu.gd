@@ -13,6 +13,8 @@ const PROPERTY_FONT = "custom_fonts/font"
 const PROPERTY_HIGHLIGHT = "custom_styles/normal"
 const PROPERTY_ALIGN = "align"
 
+const DEFAULT_FONT_SIZE = 16
+
 var focused_object setget set_focused_object
 var focused_property setget set_focused_property
 var focused_inspector setget set_focused_inspector
@@ -35,7 +37,8 @@ func _ready():
 	$FontFamilyLoadButton.connect("pressed", self, "_on_FontFamilyLoadButton_pressed")
 	$FontFamilyRefresh.connect("pressed", self, "_on_FontFamilyRefresh_pressed")
 	# FontSize
-	$FontSize.connect("item_selected", self, "_on_FontSize_item_selected")
+	$FontSize/FontSizePreset.connect("item_selected", self, "_on_FontSizePreset_item_selected")
+	$FontSize.connect("text_entered", self, "_on_FontSize_text_entered")
 	# Bold
 	$Bold.connect("pressed", self, "_on_Bold_pressed")
 	# Italic
@@ -82,7 +85,7 @@ func _on_FontFamily_item_selected(index):
 
 	dynamic_font.use_filter = true
 	dynamic_font.font_data = font_data.weights.regular
-	dynamic_font.size = int($FontSize.get_item_text($FontSize.selected))
+	dynamic_font.size = int($FontSize/FontSizePreset.get_item_text($FontSize/FontSizePreset.selected))
 	focused_object.set(PROPERTY_FONT, dynamic_font)
 
 	$FontWeight.clear()
@@ -92,7 +95,9 @@ func _on_FontFamily_item_selected(index):
 
 		if font_data.weights.get(property):
 			$FontWeight.add_item(property.capitalize())
-	$FontSize.disabled = false
+	$FontSize/FontSizePreset.disabled = false
+	$FontSize.mouse_filter = Control.MOUSE_FILTER_STOP
+	$FontSize.set(PROPERTY_FONT_COLOR, Color.white)
 	$Bold.disabled = font_data.weights.bold == null
 	$Italic.disabled = font_data.weights.regular_italic == null
 	$FontStyle.disabled = false
@@ -137,13 +142,24 @@ func _on_FontFamilyFileDialog_dir_selected(dir):
 func _on_FontFamilyRefresh_pressed():
 	_on_FontFamilyFileDialog_dir_selected(selected_font_root_dir)
 
-func _on_FontSize_item_selected(index):
+func _on_FontSizePreset_item_selected(index):
 	if not focused_object:
 		return
 
 	var dynamic_font = focused_object.get(PROPERTY_FONT)
 	if dynamic_font:
-		dynamic_font.size = int($FontSize.get_item_text(index))
+		dynamic_font.size = int($FontSize/FontSizePreset.get_item_text(index))
+
+	$FontSize.text = $FontSize/FontSizePreset.get_item_text(index)
+	emit_signal("property_edited", PROPERTY_FONT)
+
+func _on_FontSize_text_entered(new_text):
+	if not focused_object:
+		return
+
+	var dynamic_font = focused_object.get(PROPERTY_FONT)
+	if dynamic_font:
+		dynamic_font.size = int(new_text)
 
 	emit_signal("property_edited", PROPERTY_FONT)
 
@@ -330,7 +346,12 @@ func _on_focused_object_changed(new_focused_object):
 	$Italic.pressed = false
 	$Underline.pressed = false
 
-	$FontSize.disabled = dynamic_font == null
+	$FontSize.text = str(dynamic_font.size) if dynamic_font else str(DEFAULT_FONT_SIZE)
+	$FontSize.mouse_filter = Control.MOUSE_FILTER_IGNORE if dynamic_font == null else Control.MOUSE_FILTER_STOP
+	var font_size_color = Color.white
+	font_size_color.a = 0.5 if dynamic_font == null else 1
+	$FontSize.set(PROPERTY_FONT_COLOR, font_size_color)
+	$FontSize/FontSizePreset.disabled = dynamic_font == null
 	
 	var font_color = Color.white
 	if focused_object_font_color != null:
