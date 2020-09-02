@@ -95,6 +95,7 @@ func _on_FontFamily_item_selected(index):
 
 		if font_data.weights.get(property):
 			$FontWeight.add_item(property.capitalize())
+	_on_FontWeight_item_selected($FontWeight.selected)
 	$FontSize/FontSizePreset.disabled = false
 	$FontSize.mouse_filter = Control.MOUSE_FILTER_STOP
 	$FontSize.set(PROPERTY_FONT_COLOR, Color.white)
@@ -119,7 +120,15 @@ func _on_FontWeight_item_selected(index):
 		$Italic.disabled = not font_data.weights.regular_italic
 		$Bold.pressed = false
 		$Italic.pressed = false
-
+		match weight_name:
+			"bold_italic":
+				$Bold.pressed = true
+				$Italic.pressed = true
+			"bold":
+				$Bold.pressed = true
+			_:
+				if weight_name.find("italic") > -1:
+					$Italic.pressed = true
 		emit_signal("property_edited", PROPERTY_FONT)
 	
 func _on_FontFamilyLoadButton_pressed():
@@ -128,7 +137,6 @@ func _on_FontFamilyLoadButton_pressed():
 func _on_FontFamilyFileDialog_dir_selected(dir):
 	selected_font_root_dir = dir
 	# Load fonts
-	$FontFamily.clear() # TODO: OptionButton doesn't actually clear items
 	if font_manager.load_root_dir(dir):
 		for font_data in font_manager.font_datas:
 			$FontFamily.add_item(font_data.name)
@@ -353,7 +361,6 @@ func _on_focused_object_changed(new_focused_object):
 		focused_object_font_color = new_focused_object.get(PROPERTY_FONT_COLOR)
 		align = new_focused_object.get(PROPERTY_ALIGN)
 
-	# TODO: Detect if the font has bold, italic, underline
 	$Bold.disabled = true
 	$Italic.disabled = true
 	$Underline.disabled = true
@@ -385,22 +392,19 @@ func _on_focused_object_changed(new_focused_object):
 	if dynamic_font:
 		if dynamic_font.font_data:
 			var font_and_weight_name = font_manager.get_font_and_weight_name(dynamic_font.font_data)
+			var font_data = font_manager.get_font_data(font_and_weight_name.font_name)
+			var current_weight_name = font_and_weight_name.weight_name.capitalize().replace("_", " ")
 			for i in $FontFamily.get_item_count():
 				if $FontFamily.get_item_text(i) == font_and_weight_name.font_name:
 					$FontFamily.selected = i
-
-					$FontWeight.clear()
-					var font_data = font_manager.get_font_data(font_and_weight_name.font_name)
-					for property in inst2dict(font_data.weights).keys():
-						if property == "@subpath" or property == "@path":
-							continue
-
-						if font_data.weights.get(property):
-							$FontWeight.add_item(property.capitalize())
-
+					_on_FontFamily_item_selected(i)
+					break
+			
 			for i in $FontWeight.get_item_count():
-				if $FontWeight.get_item_text(i) == font_and_weight_name.weight_name.capitalize().replace("_", " "):
+				if $FontWeight.get_item_text(i) == current_weight_name:
 					$FontWeight.selected = i
+					_on_FontWeight_item_selected(i)
+					break
 		else:
 			$FontFamily.selected = $FontFamily.get_item_count() - 1
 			$FontWeight.clear()
