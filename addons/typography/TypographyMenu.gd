@@ -315,11 +315,15 @@ func _on_FontStyle_item_selected(index):
 	if not dynamic_font:
 		return
 	var font_style = font_manager.FONT_STYLES[$FontStyle.get_item_text(index)]
-	# TODO: Set font weight
+	var weight_name = font_style.weight
+	for i in $FontWeight.get_item_count():
+		if $FontWeight.get_item_text(i).to_lower().replace(" ", "_") == weight_name:
+			$FontWeight.selected = i
+			_on_FontWeight_item_selected(i)
+			break
 	dynamic_font.size = font_style.size
 	dynamic_font.extra_spacing_char = font_style.letter_spacing
 
-	# TODO: Update FontWeight
 	$FontSize.text = str(font_style.size)
 
 	emit_signal("property_edited", PROPERTY_FONT)
