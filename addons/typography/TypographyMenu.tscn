@@ -27,11 +27,21 @@ margin_right = 61.0
 margin_bottom = 22.0
 hint_tooltip = "Font Family"
 size_flags_vertical = 4
+text = "Alata"
+selected = 0
+
+[node name="FontWeight" type="OptionButton" parent="."]
+margin_left = 65.0
+margin_top = 2.0
+margin_right = 94.0
+margin_bottom = 22.0
+hint_tooltip = "Font Weight"
+size_flags_vertical = 4
 selected = 0
 
 [node name="FontFamilyLoadButton" type="Button" parent="."]
-margin_left = 65.0
-margin_right = 95.0
+margin_left = 98.0
+margin_right = 128.0
 margin_bottom = 24.0
 hint_tooltip = "Open Font Family"
 icon = ExtResource( 6 )
@@ -54,8 +64,8 @@ current_dir = "/Documents/Godot/projects/Typography"
 current_path = "/Documents/Godot/projects/Typography/"
 
 [node name="FontFamilyRefresh" type="Button" parent="."]
-margin_left = 99.0
-margin_right = 129.0
+margin_left = 132.0
+margin_right = 162.0
 margin_bottom = 24.0
 hint_tooltip = "Refresh Font Family"
 icon = ExtResource( 7 )
@@ -65,14 +75,14 @@ __meta__ = {
 }
 
 [node name="VSeparator" type="VSeparator" parent="."]
-margin_left = 133.0
-margin_right = 137.0
+margin_left = 166.0
+margin_right = 170.0
 margin_bottom = 24.0
 
 [node name="FontSize" type="OptionButton" parent="."]
-margin_left = 141.0
+margin_left = 174.0
 margin_top = 2.0
-margin_right = 186.0
+margin_right = 219.0
 margin_bottom = 22.0
 hint_tooltip = "Font Size"
 size_flags_horizontal = 4
@@ -86,8 +96,8 @@ __meta__ = {
 }
 
 [node name="Bold" type="Button" parent="."]
-margin_left = 190.0
-margin_right = 220.0
+margin_left = 223.0
+margin_right = 253.0
 margin_bottom = 24.0
 hint_tooltip = "Bold"
 disabled = true
@@ -99,8 +109,8 @@ __meta__ = {
 }
 
 [node name="Italic" type="Button" parent="."]
-margin_left = 224.0
-margin_right = 254.0
+margin_left = 257.0
+margin_right = 287.0
 margin_bottom = 24.0
 hint_tooltip = "Italic"
 disabled = true
@@ -112,8 +122,8 @@ __meta__ = {
 }
 
 [node name="Underline" type="Button" parent="."]
-margin_left = 258.0
-margin_right = 288.0
+margin_left = 291.0
+margin_right = 321.0
 margin_bottom = 24.0
 hint_tooltip = "Underline
 *Only supported in RichTextLabel"
@@ -126,8 +136,8 @@ __meta__ = {
 }
 
 [node name="FontColor" type="Button" parent="."]
-margin_left = 292.0
-margin_right = 322.0
+margin_left = 325.0
+margin_right = 355.0
 margin_bottom = 24.0
 hint_tooltip = "Font Color"
 icon = ExtResource( 4 )
@@ -166,8 +176,8 @@ __meta__ = {
 }
 
 [node name="Highlight" type="Button" parent="."]
-margin_left = 326.0
-margin_right = 356.0
+margin_left = 359.0
+margin_right = 389.0
 margin_bottom = 24.0
 hint_tooltip = "Highlight Color"
 icon = ExtResource( 8 )
@@ -206,13 +216,13 @@ __meta__ = {
 }
 
 [node name="VSeparator2" type="VSeparator" parent="."]
-margin_left = 360.0
-margin_right = 364.0
+margin_left = 393.0
+margin_right = 397.0
 margin_bottom = 24.0
 
 [node name="AlignLeft" type="Button" parent="."]
-margin_left = 368.0
-margin_right = 398.0
+margin_left = 401.0
+margin_right = 431.0
 margin_bottom = 24.0
 hint_tooltip = "Align left"
 icon = ExtResource( 13 )
@@ -222,8 +232,8 @@ __meta__ = {
 }
 
 [node name="AlignCenter" type="Button" parent="."]
-margin_left = 402.0
-margin_right = 432.0
+margin_left = 435.0
+margin_right = 465.0
 margin_bottom = 24.0
 hint_tooltip = "Align center"
 icon = ExtResource( 12 )
@@ -233,8 +243,8 @@ __meta__ = {
 }
 
 [node name="AlignRight" type="Button" parent="."]
-margin_left = 436.0
-margin_right = 466.0
+margin_left = 469.0
+margin_right = 499.0
 margin_bottom = 24.0
 hint_tooltip = "Align right"
 icon = ExtResource( 14 )
@@ -244,14 +254,14 @@ __meta__ = {
 }
 
 [node name="VSeparator3" type="VSeparator" parent="."]
-margin_left = 470.0
-margin_right = 474.0
+margin_left = 503.0
+margin_right = 507.0
 margin_bottom = 24.0
 
 [node name="FontStyle" type="OptionButton" parent="."]
-margin_left = 478.0
+margin_left = 511.0
 margin_top = 2.0
-margin_right = 571.0
+margin_right = 604.0
 margin_bottom = 22.0
 hint_tooltip = "Font Style"
 size_flags_horizontal = 4
@@ -261,8 +271,8 @@ items = [ "Heading 1", null, false, 0, null, "Heading 2", null, false, 1, null, 
 selected = 0
 
 [node name="FontClear" type="Button" parent="."]
-margin_left = 575.0
-margin_right = 605.0
+margin_left = 608.0
+margin_right = 638.0
 margin_bottom = 24.0
 hint_tooltip = "Clear Font Formatting"
 icon = ExtResource( 9 )
@@ -272,8 +282,8 @@ __meta__ = {
 }
 
 [node name="ColorClear" type="Button" parent="."]
-margin_left = 609.0
-margin_right = 639.0
+margin_left = 642.0
+margin_right = 672.0
 margin_bottom = 24.0
 hint_tooltip = "Clear Color"
 icon = ExtResource( 10 )
@@ -283,8 +293,8 @@ __meta__ = {
 }
 
 [node name="RectSizeRefresh" type="Button" parent="."]
-margin_left = 643.0
-margin_right = 673.0
+margin_left = 676.0
+margin_right = 706.0
 margin_bottom = 24.0
 hint_tooltip = "Refresh Rect Size
 *Force control to recalculate its own rect_size"

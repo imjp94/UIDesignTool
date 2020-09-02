@@ -30,6 +30,7 @@ func _init():
 func _ready():
 	# FontFamily
 	$FontFamily.connect("item_selected", self, "_on_FontFamily_item_selected")
+	$FontWeight.connect("item_selected", self, "_on_FontWeight_item_selected")
 	$FontFamilyLoadButton/FontFamilyFileDialog.connect("dir_selected", self, "_on_FontFamilyFileDialog_dir_selected")
 	$FontFamilyLoadButton.connect("pressed", self, "_on_FontFamilyLoadButton_pressed")
 	$FontFamilyRefresh.connect("pressed", self, "_on_FontFamilyRefresh_pressed")
@@ -62,6 +63,9 @@ func _ready():
 		_on_FontFamilyFileDialog_dir_selected(fonts_dir)
 
 func _on_FontFamily_item_selected(index):
+	if not focused_object:
+		return
+
 	var font_name = $FontFamily.get_item_text(index)
 	var dynamic_font = focused_object.get(PROPERTY_FONT)
 	if not dynamic_font:
@@ -81,12 +85,37 @@ func _on_FontFamily_item_selected(index):
 	dynamic_font.size = int($FontSize.get_item_text($FontSize.selected))
 	focused_object.set(PROPERTY_FONT, dynamic_font)
 
+	$FontWeight.clear()
+	for property in inst2dict(font_data.weights).keys():
+		if property == "@subpath" or property == "@path":
+			continue
+
+		if font_data.weights.get(property):
+			$FontWeight.add_item(property.capitalize())
 	$FontSize.disabled = false
 	$Bold.disabled = font_data.weights.bold == null
 	$Italic.disabled = font_data.weights.regular_italic == null
 	$FontStyle.disabled = false
 
 	emit_signal("property_edited", PROPERTY_FONT)
+
+func _on_FontWeight_item_selected(index):
+	if not focused_object:
+		return
+
+	var font_name = $FontFamily.get_item_text($FontFamily.selected)
+	var weight_name = $FontWeight.get_item_text(index).to_lower().replace(" ", "_")
+	var font_data = font_manager.get_font_data(font_name)
+	
+	var dynamic_font = focused_object.get(PROPERTY_FONT)
+	if dynamic_font:
+		dynamic_font.font_data = font_data.weights.get(weight_name)
+		$Bold.disabled = not font_data.weights.bold
+		$Italic.disabled = not font_data.weights.regular_italic
+		$Bold.pressed = false
+		$Italic.pressed = false
+
+		emit_signal("property_edited", PROPERTY_FONT)
 	
 func _on_FontFamilyLoadButton_pressed():
 	$FontFamilyLoadButton/FontFamilyFileDialog.popup()
@@ -99,6 +128,7 @@ func _on_FontFamilyFileDialog_dir_selected(dir):
 		for font_data in font_manager.font_datas:
 			$FontFamily.add_item(font_data.name)
 
+		_on_FontFamily_item_selected($FontFamily.selected)
 		config.set_value(CONFIG_SECTION_META, CONFIG_KEY_FONTS_DIR, dir)
 		config.save(CONFIG_DIR)
 	else:
@@ -108,6 +138,9 @@ func _on_FontFamilyRefresh_pressed():
 	_on_FontFamilyFileDialog_dir_selected(selected_font_root_dir)
 
 func _on_FontSize_item_selected(index):
+	if not focused_object:
+		return
+
 	var dynamic_font = focused_object.get(PROPERTY_FONT)
 	if dynamic_font:
 		dynamic_font.size = int($FontSize.get_item_text(index))
@@ -115,6 +148,9 @@ func _on_FontSize_item_selected(index):
 	emit_signal("property_edited", PROPERTY_FONT)
 
 func _on_Bold_pressed():
+	if not focused_object:
+		return
+
 	if focused_object is RichTextLabel:
 		if focused_property == "bbcode_text" and focused_inspector is TextEdit:
 			print(focused_inspector.get_selection_text())
@@ -139,6 +175,9 @@ func _on_Bold_pressed():
 	emit_signal("property_edited", PROPERTY_FONT)
 
 func _on_Italic_pressed():
+	if not focused_object:
+		return
+
 	if focused_object is RichTextLabel:
 		if focused_property == "bbcode_text" and focused_inspector is TextEdit:
 			print(focused_inspector.get_selection_text())
@@ -192,6 +231,9 @@ func _on_FontColor_pressed():
 	$FontColor/PopupPanel.popup()
 
 func _on_FontColor_ColorPicker_color_changed(color):
+	if not focused_object:
+		return
+
 	$FontColor/ColorRect.color = color
 	# Apply font color
 	focused_object.set(PROPERTY_FONT_COLOR, $FontColor/PopupPanel/ColorPicker.color)
@@ -202,6 +244,9 @@ func _on_Highlight_pressed():
 	$Highlight/PopupPanel.popup()
 
 func _on_Highlight_ColorPicker_color_changed(color):
+	if not focused_object:
+		return
+
 	$Highlight/ColorRect.color = color
 	# Apply font color
 	var style_box_flat = focused_object.get(PROPERTY_HIGHLIGHT)
@@ -232,6 +277,9 @@ func _on_AlignRight_pressed():
 		emit_signal("property_edited", PROPERTY_ALIGN)
 
 func _on_FontStyle_item_selected(index):
+	if not focused_object:
+		return
+
 	var font_style = font_manager.FONT_STYLES[$FontStyle.get_item_text(index)]
 	var dynamic_font = focused_object.get(PROPERTY_FONT)
 	# TODO: Set font weight
@@ -248,20 +296,32 @@ func _on_FontClear_pressed():
 		emit_signal("property_edited", PROPERTY_FONT)
 
 func _on_ColorClear_pressed():
-	if focused_object:
-		focused_object.set(PROPERTY_FONT_COLOR, null)
-		focused_object.set(PROPERTY_HIGHLIGHT, null)
+	if not focused_object:
+		return
 
-		$FontColor/ColorRect.color = Color.white
-		$Highlight/ColorRect.color = Color.white
+	focused_object.set(PROPERTY_FONT_COLOR, null)
+	focused_object.set(PROPERTY_HIGHLIGHT, null)
 
-		emit_signal("property_edited", PROPERTY_FONT_COLOR)
-		emit_signal("property_edited", PROPERTY_HIGHLIGHT)
+	$FontColor/ColorRect.color = Color.white
+	$Highlight/ColorRect.color = Color.white
+
+	emit_signal("property_edited", PROPERTY_FONT_COLOR)
+	emit_signal("property_edited", PROPERTY_HIGHLIGHT)
 
 func _on_RectSizeRefresh_pressed():
-	focused_object.set("rect_size", Vector2.ZERO)
+	if focused_object:
+		focused_object.set("rect_size", Vector2.ZERO)
 
 func _on_focused_object_changed(new_focused_object):
+	var dynamic_font
+	var focused_object_highlight
+	var focused_object_font_color
+
+	if new_focused_object:
+		dynamic_font = new_focused_object.get(PROPERTY_FONT)
+		focused_object_highlight = new_focused_object.get(PROPERTY_HIGHLIGHT)
+		focused_object_font_color = new_focused_object.get(PROPERTY_FONT_COLOR)
+
 	# TODO: Detect if the font has bold, italic, underline
 	$Bold.disabled = true
 	$Italic.disabled = true
@@ -270,17 +330,14 @@ func _on_focused_object_changed(new_focused_object):
 	$Italic.pressed = false
 	$Underline.pressed = false
 
-	var dynamic_font = new_focused_object.get(PROPERTY_FONT)
 	$FontSize.disabled = dynamic_font == null
-
-	var focused_object_font_color = new_focused_object.get(PROPERTY_FONT_COLOR)
+	
 	var font_color = Color.white
 	if focused_object_font_color != null:
 		font_color = focused_object_font_color
 	$FontColor/ColorRect.color = font_color
 	$FontColor/PopupPanel/ColorPicker.color = font_color
 
-	var focused_object_highlight = new_focused_object.get(PROPERTY_HIGHLIGHT)
 	var highlight = Color.white # default modulate color
 	if focused_object_highlight != null:
 		if focused_object_highlight is StyleBoxFlat:
