@@ -1,0 +1,295 @@
+[gd_scene load_steps=15 format=2]
+
+[ext_resource path="res://assets/icons/editor/format_bold-white-18dp.svg" type="Texture" id=1]
+[ext_resource path="res://assets/icons/editor/format_italic-white-18dp.svg" type="Texture" id=2]
+[ext_resource path="res://assets/icons/editor/format_underlined-white-18dp.svg" type="Texture" id=3]
+[ext_resource path="res://assets/icons/editor/format-color-text.png" type="Texture" id=4]
+[ext_resource path="res://addons/typography/TypographyMenu.gd" type="Script" id=5]
+[ext_resource path="res://assets/icons/editor/folder_open-white-18dp.svg" type="Texture" id=6]
+[ext_resource path="res://assets/icons/editor/refresh-white-18dp.svg" type="Texture" id=7]
+[ext_resource path="res://assets/icons/editor/marker.png" type="Texture" id=8]
+[ext_resource path="res://assets/icons/editor/format_clear-white-18dp.svg" type="Texture" id=9]
+[ext_resource path="res://assets/icons/editor/format_color_reset-white-18dp.svg" type="Texture" id=10]
+[ext_resource path="res://assets/icons/editor/photo_size_select_small-white-18dp.svg" type="Texture" id=11]
+[ext_resource path="res://assets/icons/editor/format_align_center-white-18dp.svg" type="Texture" id=12]
+[ext_resource path="res://assets/icons/editor/format_align_left-white-18dp.svg" type="Texture" id=13]
+[ext_resource path="res://assets/icons/editor/format_align_right-white-18dp.svg" type="Texture" id=14]
+
+[node name="TypographyMenu" type="HBoxContainer"]
+script = ExtResource( 5 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="FontFamily" type="OptionButton" parent="."]
+margin_top = 2.0
+margin_right = 61.0
+margin_bottom = 22.0
+hint_tooltip = "Font Family"
+size_flags_vertical = 4
+selected = 0
+
+[node name="FontFamilyLoadButton" type="Button" parent="."]
+margin_left = 65.0
+margin_right = 95.0
+margin_bottom = 24.0
+hint_tooltip = "Open Font Family"
+icon = ExtResource( 6 )
+flat = true
+__meta__ = {
+"_edit_use_anchors_": false,
+"_editor_description_": ""
+}
+
+[node name="FontFamilyFileDialog" type="FileDialog" parent="FontFamilyLoadButton"]
+margin_left = -79.0
+margin_right = 236.0
+margin_bottom = 130.0
+rect_min_size = Vector2( 300, 200 )
+window_title = "Open a Directory"
+resizable = true
+mode = 2
+access = 2
+current_dir = "/Documents/Godot/projects/Typography"
+current_path = "/Documents/Godot/projects/Typography/"
+
+[node name="FontFamilyRefresh" type="Button" parent="."]
+margin_left = 99.0
+margin_right = 129.0
+margin_bottom = 24.0
+hint_tooltip = "Refresh Font Family"
+icon = ExtResource( 7 )
+flat = true
+__meta__ = {
+"_editor_description_": ""
+}
+
+[node name="VSeparator" type="VSeparator" parent="."]
+margin_left = 133.0
+margin_right = 137.0
+margin_bottom = 24.0
+
+[node name="FontSize" type="OptionButton" parent="."]
+margin_left = 141.0
+margin_top = 2.0
+margin_right = 186.0
+margin_bottom = 22.0
+hint_tooltip = "Font Size"
+size_flags_horizontal = 4
+size_flags_vertical = 4
+disabled = true
+text = "16"
+items = [ "8", null, false, 0, null, "9", null, false, 1, null, "10", null, false, 2, null, "11", null, false, 3, null, "12", null, false, 4, null, "14", null, false, 5, null, "16", null, false, 6, null, "18", null, false, 7, null, "24", null, false, 8, null, "30", null, false, 9, null, "36", null, false, 10, null, "48", null, false, 11, null, "60", null, false, 12, null, "72", null, false, 13, null, "96", null, false, 14, null ]
+selected = 6
+__meta__ = {
+"_editor_description_": ""
+}
+
+[node name="Bold" type="Button" parent="."]
+margin_left = 190.0
+margin_right = 220.0
+margin_bottom = 24.0
+hint_tooltip = "Bold"
+disabled = true
+toggle_mode = true
+icon = ExtResource( 1 )
+flat = true
+__meta__ = {
+"_editor_description_": ""
+}
+
+[node name="Italic" type="Button" parent="."]
+margin_left = 224.0
+margin_right = 254.0
+margin_bottom = 24.0
+hint_tooltip = "Italic"
+disabled = true
+toggle_mode = true
+icon = ExtResource( 2 )
+flat = true
+__meta__ = {
+"_editor_description_": ""
+}
+
+[node name="Underline" type="Button" parent="."]
+margin_left = 258.0
+margin_right = 288.0
+margin_bottom = 24.0
+hint_tooltip = "Underline
+*Only supported in RichTextLabel"
+disabled = true
+toggle_mode = true
+icon = ExtResource( 3 )
+flat = true
+__meta__ = {
+"_editor_description_": ""
+}
+
+[node name="FontColor" type="Button" parent="."]
+margin_left = 292.0
+margin_right = 322.0
+margin_bottom = 24.0
+hint_tooltip = "Font Color"
+icon = ExtResource( 4 )
+flat = true
+__meta__ = {
+"_editor_description_": ""
+}
+
+[node name="PopupPanel" type="PopupPanel" parent="FontColor"]
+margin_right = 316.0
+margin_bottom = 470.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorPicker" type="ColorPicker" parent="FontColor/PopupPanel"]
+margin_left = 4.0
+margin_top = 4.0
+margin_right = 312.0
+margin_bottom = 466.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="FontColor"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -9.0
+margin_top = 8.0
+margin_right = 9.0
+margin_bottom = 11.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Highlight" type="Button" parent="."]
+margin_left = 326.0
+margin_right = 356.0
+margin_bottom = 24.0
+hint_tooltip = "Highlight Color"
+icon = ExtResource( 8 )
+flat = true
+__meta__ = {
+"_editor_description_": ""
+}
+
+[node name="PopupPanel" type="PopupPanel" parent="Highlight"]
+margin_right = 316.0
+margin_bottom = 470.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorPicker" type="ColorPicker" parent="Highlight/PopupPanel"]
+margin_left = 4.0
+margin_top = 4.0
+margin_right = 312.0
+margin_bottom = 466.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="Highlight"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -9.0
+margin_top = 8.0
+margin_right = 9.0
+margin_bottom = 11.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VSeparator2" type="VSeparator" parent="."]
+margin_left = 360.0
+margin_right = 364.0
+margin_bottom = 24.0
+
+[node name="AlignLeft" type="Button" parent="."]
+margin_left = 368.0
+margin_right = 398.0
+margin_bottom = 24.0
+hint_tooltip = "Align left"
+icon = ExtResource( 13 )
+flat = true
+__meta__ = {
+"_editor_description_": ""
+}
+
+[node name="AlignCenter" type="Button" parent="."]
+margin_left = 402.0
+margin_right = 432.0
+margin_bottom = 24.0
+hint_tooltip = "Align center"
+icon = ExtResource( 12 )
+flat = true
+__meta__ = {
+"_editor_description_": ""
+}
+
+[node name="AlignRight" type="Button" parent="."]
+margin_left = 436.0
+margin_right = 466.0
+margin_bottom = 24.0
+hint_tooltip = "Align right"
+icon = ExtResource( 14 )
+flat = true
+__meta__ = {
+"_editor_description_": ""
+}
+
+[node name="VSeparator3" type="VSeparator" parent="."]
+margin_left = 470.0
+margin_right = 474.0
+margin_bottom = 24.0
+
+[node name="FontStyle" type="OptionButton" parent="."]
+margin_left = 478.0
+margin_top = 2.0
+margin_right = 571.0
+margin_bottom = 22.0
+hint_tooltip = "Font Style"
+size_flags_horizontal = 4
+size_flags_vertical = 4
+text = "Heading 1"
+items = [ "Heading 1", null, false, 0, null, "Heading 2", null, false, 1, null, "Heading 3", null, false, 2, null, "Heading 4", null, false, 3, null, "Heading 5", null, false, 4, null, "Heading 6", null, false, 5, null, "Subtitle 1", null, false, 6, null, "Subtitle 2", null, false, 7, null, "Body 1", null, false, 8, null, "Body 2", null, false, 9, null, "Button", null, false, 10, null, "Caption", null, false, 11, null, "Overline", null, false, 12, null ]
+selected = 0
+
+[node name="FontClear" type="Button" parent="."]
+margin_left = 575.0
+margin_right = 605.0
+margin_bottom = 24.0
+hint_tooltip = "Clear Font Formatting"
+icon = ExtResource( 9 )
+flat = true
+__meta__ = {
+"_editor_description_": ""
+}
+
+[node name="ColorClear" type="Button" parent="."]
+margin_left = 609.0
+margin_right = 639.0
+margin_bottom = 24.0
+hint_tooltip = "Clear Color"
+icon = ExtResource( 10 )
+flat = true
+__meta__ = {
+"_editor_description_": ""
+}
+
+[node name="RectSizeRefresh" type="Button" parent="."]
+margin_left = 643.0
+margin_right = 673.0
+margin_bottom = 24.0
+hint_tooltip = "Refresh Rect Size
+*Force control to recalculate its own rect_size"
+icon = ExtResource( 11 )
+flat = true
+__meta__ = {
+"_editor_description_": ""
+}
