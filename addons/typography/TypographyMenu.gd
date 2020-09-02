@@ -31,6 +31,7 @@ func _init():
 
 func _ready():
 	# FontFamily
+	$FontFamily.add_item("None")
 	$FontFamily.connect("item_selected", self, "_on_FontFamily_item_selected")
 	$FontWeight.connect("item_selected", self, "_on_FontWeight_item_selected")
 	$FontFamilyLoadButton/FontFamilyFileDialog.connect("dir_selected", self, "_on_FontFamilyFileDialog_dir_selected")
@@ -70,6 +71,10 @@ func _on_FontFamily_item_selected(index):
 		return
 
 	var font_name = $FontFamily.get_item_text(index)
+	if font_name == "None":
+		_on_FontClear_pressed()
+		return
+
 	var dynamic_font = focused_object.get(PROPERTY_FONT)
 	if not dynamic_font:
 		dynamic_font = DynamicFont.new()
@@ -127,6 +132,7 @@ func _on_FontFamilyFileDialog_dir_selected(dir):
 	if font_manager.load_root_dir(dir):
 		for font_data in font_manager.font_datas:
 			$FontFamily.add_item(font_data.name)
+		$FontFamily.add_item("None")
 
 		_on_FontFamily_item_selected($FontFamily.selected)
 		config.set_value(CONFIG_SECTION_META, CONFIG_KEY_FONTS_DIR, dir)
@@ -313,6 +319,9 @@ func _on_FontStyle_item_selected(index):
 func _on_FontClear_pressed():
 	if focused_object:
 		focused_object.set(PROPERTY_FONT, null)
+		$FontFamily.selected = $FontFamily.get_item_count() - 1
+		$FontWeight.clear()
+		_on_focused_object_changed(focused_object) # Update ui default state
 		emit_signal("property_edited", PROPERTY_FONT)
 
 func _on_ColorClear_pressed():
@@ -392,6 +401,12 @@ func _on_focused_object_changed(new_focused_object):
 			for i in $FontWeight.get_item_count():
 				if $FontWeight.get_item_text(i) == font_and_weight_name.weight_name.capitalize().replace("_", " "):
 					$FontWeight.selected = i
+		else:
+			$FontFamily.selected = $FontFamily.get_item_count() - 1
+			$FontWeight.clear()
+	else:
+		$FontFamily.selected = $FontFamily.get_item_count() - 1 # 'None' always is the last item
+		$FontWeight.clear()
 
 	$AlignLeft.pressed = false
 	$AlignCenter.pressed = false
