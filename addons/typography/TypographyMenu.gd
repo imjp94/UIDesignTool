@@ -277,18 +277,24 @@ func _on_Highlight_ColorPicker_color_changed(color):
 func _on_AlignLeft_pressed():
 	if focused_object:
 		focused_object.set(PROPERTY_ALIGN, Label.ALIGN_LEFT)
+		$AlignCenter.pressed = false
+		$AlignRight.pressed = false
 
 		emit_signal("property_edited", PROPERTY_ALIGN)
 
 func _on_AlignCenter_pressed():
 	if focused_object:
 		focused_object.set(PROPERTY_ALIGN, Label.ALIGN_CENTER)
+		$AlignLeft.pressed = false
+		$AlignRight.pressed = false
 
 		emit_signal("property_edited", PROPERTY_ALIGN)
 
 func _on_AlignRight_pressed():
 	if focused_object:
 		focused_object.set(PROPERTY_ALIGN, Label.ALIGN_RIGHT)
+		$AlignLeft.pressed = false
+		$AlignCenter.pressed = false
 
 		emit_signal("property_edited", PROPERTY_ALIGN)
 
@@ -332,11 +338,13 @@ func _on_focused_object_changed(new_focused_object):
 	var dynamic_font
 	var focused_object_highlight
 	var focused_object_font_color
+	var align
 
 	if new_focused_object:
 		dynamic_font = new_focused_object.get(PROPERTY_FONT)
 		focused_object_highlight = new_focused_object.get(PROPERTY_HIGHLIGHT)
 		focused_object_font_color = new_focused_object.get(PROPERTY_FONT_COLOR)
+		align = new_focused_object.get(PROPERTY_ALIGN)
 
 	# TODO: Detect if the font has bold, italic, underline
 	$Bold.disabled = true
@@ -367,6 +375,25 @@ func _on_focused_object_changed(new_focused_object):
 	$Highlight/PopupPanel/ColorPicker.color = highlight
 
 	$FontStyle.disabled = dynamic_font == null
+
+	$AlignLeft.pressed = false
+	$AlignCenter.pressed = false
+	$AlignRight.pressed = false
+	if align != null:
+		$AlignLeft.disabled = false
+		$AlignCenter.disabled = false
+		$AlignRight.disabled = false
+		match align:
+			Label.ALIGN_LEFT:
+				$AlignLeft.pressed = true
+			Label.ALIGN_CENTER:
+				$AlignCenter.pressed = true
+			Label.ALIGN_RIGHT:
+				$AlignRight.pressed = true
+	else:
+		$AlignLeft.disabled = true
+		$AlignCenter.disabled = true
+		$AlignRight.disabled = true
 
 func _on_focused_property_changed(new_property):
 	pass
