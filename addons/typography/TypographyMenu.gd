@@ -31,7 +31,6 @@ func _init():
 
 func _ready():
 	# FontFamily
-	$FontFamily.add_item("None")
 	$FontFamily.connect("item_selected", self, "_on_FontFamily_item_selected")
 	$FontWeight.connect("item_selected", self, "_on_FontWeight_item_selected")
 	$FontFamilyLoadButton/FontFamilyFileDialog.connect("dir_selected", self, "_on_FontFamilyFileDialog_dir_selected")
