@@ -153,6 +153,19 @@ func load_fonts(dir):
 
 	return true
 
+func get_font_and_weight_name(res):
+	var pair = {}
+	for data in font_datas:
+		for property in inst2dict(data.weights).keys():
+			if property == "@subpath" or property == "@path":
+				continue
+		
+			var weight = data.weights.get(property)
+			if weight:
+				if weight == res:
+					return {"font_name": data.name, "weight_name": property}
+	return null 
+
 func get_font_data(font_name):
 	var font_data
 	for data in font_datas:

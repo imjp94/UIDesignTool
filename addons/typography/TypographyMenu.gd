@@ -74,12 +74,7 @@ func _on_FontFamily_item_selected(index):
 	if not dynamic_font:
 		dynamic_font = DynamicFont.new()
 
-	var font_data
-	for data in font_manager.font_datas:
-		if data.name == font_name:
-			font_data = data
-			break
-
+	var font_data = font_manager.get_font_data(font_name)
 	if not font_data:
 		return
 
@@ -378,6 +373,25 @@ func _on_focused_object_changed(new_focused_object):
 	$Highlight/PopupPanel/ColorPicker.color = highlight
 
 	$FontStyle.disabled = dynamic_font == null
+	if dynamic_font:
+		if dynamic_font.font_data:
+			var font_and_weight_name = font_manager.get_font_and_weight_name(dynamic_font.font_data)
+			for i in $FontFamily.get_item_count():
+				if $FontFamily.get_item_text(i) == font_and_weight_name.font_name:
+					$FontFamily.selected = i
+
+					$FontWeight.clear()
+					var font_data = font_manager.get_font_data(font_and_weight_name.font_name)
+					for property in inst2dict(font_data.weights).keys():
+						if property == "@subpath" or property == "@path":
+							continue
+
+						if font_data.weights.get(property):
+							$FontWeight.add_item(property.capitalize())
+
+			for i in $FontWeight.get_item_count():
+				if $FontWeight.get_item_text(i) == font_and_weight_name.weight_name.capitalize().replace("_", " "):
+					$FontWeight.selected = i
 
 	$AlignLeft.pressed = false
 	$AlignCenter.pressed = false
