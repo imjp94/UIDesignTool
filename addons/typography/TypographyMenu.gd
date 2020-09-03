@@ -277,11 +277,12 @@ func _on_FontFamilyFileDialog_dir_selected(dir):
 	selected_font_root_dir = dir
 	# Load fonts
 	if font_manager.load_root_dir(dir):
+		$FontFamily.clear()
 		for font_data in font_manager.font_resources:
 			$FontFamily.add_item(font_data.name)
 		$FontFamily.add_item("None")
 
-		_on_FontFamily_item_selected($FontFamily.selected)
+		reflect_font_family_control()
 		config.set_value(CONFIG_SECTION_META, CONFIG_KEY_FONTS_DIR, dir)
 		config.save(CONFIG_DIR)
 	else:
