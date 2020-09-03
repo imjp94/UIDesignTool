@@ -10,6 +10,7 @@ var editor_inspector = get_editor_interface().get_inspector()
 
 func _enter_tree():
 	menu = TypographyMenu.instance()
+	menu.undo_redo = get_undo_redo()
 	menu.connect("property_edited", self, "_on_TypographyMenu_property_edited")
 	overlay_text_edit = OverlayTextEdit.instance()
 	overlay_text_edit.set_as_toplevel(true)
