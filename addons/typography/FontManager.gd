@@ -47,7 +47,7 @@ var FONT_STYLES = {
 }
 const DIR_FOLDER_PATTERN = "\\w+(?!.*\\w)"
 
-var font_datas = []
+var font_resources = []
 
 var _font_file_regex = RegEx.new()
 var _font_weight_regexes = {
@@ -92,7 +92,7 @@ func load_root_dir(root_dir):
 	var directory = Directory.new()
 	var result = directory.open(root_dir)
 	if result == OK:
-		font_datas.clear()
+		font_resources.clear()
 		directory.list_dir_begin(true) # Skip . and .. directory and hidden
 		var dir = directory.get_next()
 		while dir != "":
@@ -114,7 +114,7 @@ func load_fonts(dir):
 	var result = directory.open(dir)
 	if result == OK:
 		var font_name = _dir_folder_regex.search(dir).get_string()
-		var font_data = FontData.new(font_name)
+		var font_resource = FontResource.new(font_name)
 		directory.list_dir_begin(true) # Skip . and .. directory and hidden
 		var filename = directory.get_next()
 		while filename != "":
@@ -131,20 +131,20 @@ func load_fonts(dir):
 					if _font_weight_regexes[font_weight_name].search(filename):
 						var font_weight = load(abs_dir)
 						if _font_italic_regex.search(filename):
-							font_data.weights.set(font_weight_name + "_italic", font_weight)
+							font_resource.weights.set(font_weight_name + "_italic", font_weight)
 						else:
-							font_data.weights.set(font_weight_name, font_weight)
+							font_resource.weights.set(font_weight_name, font_weight)
 						break
 					else: 
 						# Capture regular italic from {font-name}-italic.ttf
 						if _font_italic_only_regex.search(filename):
 							var font_weight = load(abs_dir)
-							font_data.weights.set("regular_italic", font_weight)
+							font_resource.weights.set("regular_italic", font_weight)
 			filename = directory.get_next()
 		directory.list_dir_end()
 
-		if not font_data.weights.empty():
-			font_datas.append(font_data)
+		if not font_resource.weights.empty():
+			font_resources.append(font_resource)
 		else:
 			push_warning("Typography: Failed to load %s: Unable to locate usable .ttf files" % dir)
 	else:
@@ -153,27 +153,26 @@ func load_fonts(dir):
 
 	return true
 
-func get_font_and_weight_name(res):
-	var pair = {}
-	for data in font_datas:
-		for property in inst2dict(data.weights).keys():
+func get_font_and_weight_name(font_data):
+	for res in font_resources:
+		for property in inst2dict(res.weights).keys():
 			if property == "@subpath" or property == "@path":
 				continue
 		
-			var weight = data.weights.get(property)
+			var weight = res.weights.get(property)
 			if weight:
-				if weight == res:
-					return {"font_name": data.name, "weight_name": property}
+				if weight == font_data:
+					return {"font_name": res.name, "weight_name": property}
 	return null 
 
-func get_font_data(font_name):
-	var font_data
-	for data in font_datas:
-		if data.name == font_name:
-			return data
+func get_font_resource(font_name):
+	var font_resource
+	for res in font_resources:
+		if res.name == font_name:
+			return res
 	return null
 
-class FontData:
+class FontResource:
 	var name = ""
 	var weights = FontWeights.new()
 

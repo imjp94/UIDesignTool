@@ -159,10 +159,10 @@ func reflect_font_size_control():
 func reflect_bold_italic_control():
 	var font_name = $FontFamily.get_item_text($FontFamily.selected)
 	var weight_name = $FontWeight.get_item_text($FontWeight.selected).to_lower().replace(" ", "_") if font_name != "None" else ""
-	var font_data = font_manager.get_font_data(font_name)
+	var font_resource = font_manager.get_font_resource(font_name)
 
-	$Bold.disabled = not font_data.weights.bold if font_data else true
-	$Italic.disabled = not font_data.weights.regular_italic if font_data else true
+	$Bold.disabled = not font_resource.weights.bold if font_resource else true
+	$Italic.disabled = not font_resource.weights.regular_italic if font_resource else true
 	$Bold.pressed = false
 	$Italic.pressed = false
 	match weight_name:
@@ -171,9 +171,11 @@ func reflect_bold_italic_control():
 			$Italic.pressed = true
 		"bold":
 			$Bold.pressed = true
+			$Italic.disabled = not font_resource.weights.bold_italic
 		_:
 			if weight_name.find("italic") > -1:
 				$Italic.pressed = true
+				$Bold.disabled = not font_resource.weights.bold_italic
 
 func reflect_font_color_control():
 	var focused_object_font_color = focused_object.get(PROPERTY_FONT_COLOR) if focused_object else null
@@ -185,12 +187,12 @@ func reflect_font_color_control():
 
 func reflect_highlight_control():
 	var focused_object_highlight = focused_object.get(PROPERTY_HIGHLIGHT) if focused_object else null
-	var highlight = Color.white # default modulate color
+	var highlight_color = Color.white # default modulate color
 	if focused_object_highlight != null:
 		if focused_object_highlight is StyleBoxFlat:
-			highlight = focused_object_highlight.bg_color
-	$Highlight/ColorRect.color = highlight
-	$Highlight/PopupPanel/ColorPicker.color = highlight
+			highlight_color = focused_object_highlight.bg_color
+	$Highlight/ColorRect.color = highlight_color
+	$Highlight/PopupPanel/ColorPicker.color = highlight_color
 
 func reflect_align_control():
 	var align = focused_object.get(PROPERTY_ALIGN) if focused_object else null
@@ -224,13 +226,13 @@ func reset_font_family_control():
 
 func reset_font_weight_control():
 	var font_name = $FontFamily.get_item_text($FontFamily.selected)
-	var font_data = font_manager.get_font_data(font_name)
+	var font_resource = font_manager.get_font_resource(font_name)
 	$FontWeight.clear()
-	for property in inst2dict(font_data.weights).keys():
+	for property in inst2dict(font_resource.weights).keys():
 		if property == "@subpath" or property == "@path":
 			continue
 
-		if font_data.weights.get(property):
+		if font_resource.weights.get(property):
 			$FontWeight.add_item(property.capitalize())
 
 func _on_FontFamily_item_selected(index):
@@ -243,18 +245,18 @@ func _on_FontFamily_item_selected(index):
 		return
 
 	var dynamic_font = focused_object.get(PROPERTY_FONT)
-	var font_data = font_manager.get_font_data(font_name)
-	if not font_data:
+	var font_resource = font_manager.get_font_resource(font_name)
+	if not font_resource:
 		return
 
 	if not dynamic_font:
 		dynamic_font = DynamicFont.new()
 		dynamic_font.use_filter = true
-		dynamic_font.font_data = font_data.weights.regular
+		dynamic_font.font_data = font_resource.weights.regular
 		dynamic_font.size = int($FontSize/FontSizePreset.get_item_text($FontSize/FontSizePreset.selected)) # TODO: set_font_size
 		change_font(focused_object, dynamic_font)
 	else:
-		change_font_data(focused_object, font_data.weights.regular) # TODO: Get fallback weight if regular not found
+		change_font_data(focused_object, font_resource.weights.regular) # TODO: Get fallback weight if regular not found
 
 func _on_FontWeight_item_selected(index):
 	if not focused_object:
@@ -262,11 +264,11 @@ func _on_FontWeight_item_selected(index):
 
 	var font_name = $FontFamily.get_item_text($FontFamily.selected)
 	var weight_name = $FontWeight.get_item_text(index).to_lower().replace(" ", "_")
-	var font_data = font_manager.get_font_data(font_name)
+	var font_resource = font_manager.get_font_resource(font_name)
 	
 	var dynamic_font = focused_object.get(PROPERTY_FONT)
 	if dynamic_font:
-		change_font_data(focused_object, font_data.weights.get(weight_name))
+		change_font_data(focused_object, font_resource.weights.get(weight_name))
 	
 func _on_FontFamilyLoadButton_pressed():
 	$FontFamilyLoadButton/FontFamilyFileDialog.popup()
@@ -275,7 +277,7 @@ func _on_FontFamilyFileDialog_dir_selected(dir):
 	selected_font_root_dir = dir
 	# Load fonts
 	if font_manager.load_root_dir(dir):
-		for font_data in font_manager.font_datas:
+		for font_data in font_manager.font_resources:
 			$FontFamily.add_item(font_data.name)
 		$FontFamily.add_item("None")
 
@@ -310,18 +312,18 @@ func _on_Bold_pressed():
 			print(focused_inspector.get_selection_text())
 			Utils.markup_text_edit_selection(focused_inspector, "[b]", "[/b]")
 	else:
-		var font_data = _bold_or_italic()
+		var font_resource = _bold_or_italic()
 
-		if not font_data:
+		if not font_resource:
 			return
 
 		var bold = $Bold.pressed
 		var italic = $Italic.pressed
 		if bold == italic:
 			if not bold:
-				can_italic_active(font_data)
+				can_italic_active(font_resource)
 		else:
-			can_italic_active(font_data)
+			can_italic_active(font_resource)
 
 		if $Italic.disabled:
 			$Italic.pressed = false
@@ -335,18 +337,18 @@ func _on_Italic_pressed():
 			print(focused_inspector.get_selection_text())
 			Utils.markup_text_edit_selection(focused_inspector, "[i]", "[/i]")
 	else:
-		var font_data = _bold_or_italic()
+		var font_resource = _bold_or_italic()
 
-		if not font_data:
+		if not font_resource:
 			return
 
 		var bold = $Italic.pressed
 		var italic = $Bold.pressed
 		if bold == italic:
 			if not bold:
-				can_bold_active(font_data)
+				can_bold_active(font_resource)
 		else:
-			can_bold_active(font_data)
+			can_bold_active(font_resource)
 
 		if $Bold.disabled:
 			$Bold.pressed = false
@@ -356,24 +358,24 @@ func _bold_or_italic():
 	var italic = $Italic.pressed
 
 	var font_family = $FontFamily.get_item_text($FontFamily.selected)
-	var font_data = font_manager.get_font_data(font_family)
-	if not font_data:
+	var font_resource = font_manager.get_font_resource(font_family)
+	if not font_resource:
 		return null
 	
-	var weight = font_data.weights.regular_italic if $Italic.pressed else font_data.weights.regular
-	weight = font_data.weights.bold_italic if $Bold.pressed else weight
+	var weight = font_resource.weights.regular_italic if $Italic.pressed else font_resource.weights.regular
+	weight = font_resource.weights.bold_italic if $Bold.pressed else weight
 	if bold and italic:
-		weight = font_data.weights.bold_italic
+		weight = font_resource.weights.bold_italic
 	elif bold:
-		weight = font_data.weights.bold
+		weight = font_resource.weights.bold
 	elif italic:
-		weight = font_data.weights.regular_italic
+		weight = font_resource.weights.regular_italic
 	else:
-		weight = font_data.weights.regular
+		weight = font_resource.weights.regular
 
 	change_font_data(focused_object, weight)
 
-	return font_data
+	return font_resource
 
 func _on_FontColor_pressed():
 	$FontColor/PopupPanel.popup()
@@ -484,48 +486,31 @@ func _on_focused_object_changed(new_focused_object):
 
 func _on_font_data_changed(new_font_data):
 	var font_and_weight_name = font_manager.get_font_and_weight_name(new_font_data)
-	# TODO: Change name of FontManager.FontData, current new_font_data != font_data
-	var font_data = font_manager.get_font_data(font_and_weight_name.font_name) 
+	var font_resource = font_manager.get_font_resource(font_and_weight_name.font_name)
 	if font_and_weight_name:
 		reflect_font_family_control()
 
-	$Bold.disabled = not font_data.weights.bold
-	$Italic.disabled = not font_data.weights.regular_italic
-	$Bold.pressed = false
-	$Italic.pressed = false
-	match font_and_weight_name.weight_name:
-		"bold_italic":
-			$Bold.pressed = true
-			$Italic.pressed = true
-		"bold":
-			$Bold.pressed = true
-		_:
-			if font_and_weight_name.weight_name.find("italic") > -1:
-				$Italic.pressed = true
-
+	reflect_bold_italic_control()
 	emit_signal("property_edited", PROPERTY_FONT)
 
 func _on_font_changed(new_font):
 	var font_name = $FontFamily.get_item_text($FontFamily.selected)
-	var font_data = font_manager.get_font_data(font_name)
+	var font_resource = font_manager.get_font_resource(font_name)
 	if not new_font:
 		reset_font_family_control()
 	else:
-		if not font_data: # Current font not equal to FontFamily selected
+		if not font_resource: # Current font not equal to FontFamily selected
 			var font_and_weight_name = font_manager.get_font_and_weight_name(new_font.font_data)
-			font_data = font_manager.get_font_data(font_and_weight_name.font_name)
+			font_resource = font_manager.get_font_resource(font_and_weight_name.font_name)
 			if font_and_weight_name:
 				reflect_font_family_control()
 		else:
 			reset_font_weight_control()
 			reflect_font_weight_control()
 
-	$FontSize/FontSizePreset.disabled = false
-	$FontSize.mouse_filter = Control.MOUSE_FILTER_STOP
-	$FontSize.set(PROPERTY_FONT_COLOR, Color.white)
-	$Bold.disabled = font_data.weights.bold == null if new_font else true
-	$Italic.disabled = font_data.weights.regular_italic == null if new_font else true
-	$FontStyle.disabled = false
+	reflect_font_size_control()
+	reflect_bold_italic_control()
+	reflect_font_style_control()
 	emit_signal("property_edited", PROPERTY_FONT)
 
 func _on_font_size_changed(new_font_size):
@@ -540,30 +525,12 @@ func _on_font_color_changed(new_font_color):
 	emit_signal("property_edited", PROPERTY_FONT_COLOR)
 
 func _on_highlight_changed(new_highlight):
-	if new_highlight:
-		if new_highlight.bg_color:
-			$Highlight/ColorRect.color = new_highlight.bg_color
-		else:
-			$Highlight/ColorRect.color = Color.white
-	else:
-		$Highlight/ColorRect.color = Color.white
+	reflect_highlight_control()
 
 	emit_signal("property_edited", PROPERTY_HIGHLIGHT)
 
 func _on_align_changed(align):
-	match align:
-		Label.ALIGN_LEFT:
-			$AlignLeft.pressed = true
-			$AlignCenter.pressed = false
-			$AlignRight.pressed = false
-		Label.ALIGN_CENTER:
-			$AlignLeft.pressed = false
-			$AlignCenter.pressed = true
-			$AlignRight.pressed = false
-		Label.ALIGN_RIGHT:
-			$AlignLeft.pressed = false
-			$AlignCenter.pressed = false
-			$AlignRight.pressed = true
+	reflect_align_control()
 
 	emit_signal("property_edited", PROPERTY_ALIGN)
 
@@ -605,7 +572,11 @@ func set_font_style(object, font_style):
 	if not font_style:
 		return
 
-	set_font_data(object, font_manager.get_font_data($FontFamily.get_item_text($FontFamily.selected)).weights.get(font_style.weight))
+	var font_data = font_manager.get_font_resource($FontFamily.get_item_text($FontFamily.selected)).weights.get(font_style.weight)
+	if not font_data:
+		# Use current weight if desired weight not found
+		font_data = object.get(PROPERTY_FONT).font_data
+	set_font_data(object, font_data)
 	set_font_size(object, font_style.size)
 	set_font_extra_spacing_char(object, font_style.letter_spacing)
 
