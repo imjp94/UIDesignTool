@@ -120,17 +120,109 @@ func change_font_style(object, to):
 	undo_redo.add_undo_method(self, "set_font_style", object, from if from else false)
 	undo_redo.commit_action()
 
-# Reflect selected object font family to FontFamily
-func reflect_font_family(font_name, weight_name):
-	for i in $FontFamily.get_item_count():
-		if $FontFamily.get_item_text(i) == font_name:
-			$FontFamily.selected = i
-			update_font_weight_select()
-			reflect_font_weight(weight_name)
-			return true
+func reflect_font_family_control():
+	var dynamic_font = focused_object.get(PROPERTY_FONT) if focused_object else null
+	if dynamic_font:
+		if dynamic_font.font_data:
+			var font_and_weight_name = font_manager.get_font_and_weight_name(dynamic_font.font_data)
+			for i in $FontFamily.get_item_count():
+				if $FontFamily.get_item_text(i) == font_and_weight_name.font_name:
+					$FontFamily.selected = i
+					reset_font_weight_control()
+					reflect_font_weight_control()
+					break
+		else:
+			reset_font_family_control()
+	else:
+		reset_font_family_control()
+
+func reflect_font_weight_control():
+	var dynamic_font = focused_object.get(PROPERTY_FONT) if focused_object else null
+	if dynamic_font:
+		if dynamic_font.font_data:
+			var font_and_weight_name = font_manager.get_font_and_weight_name(dynamic_font.font_data)
+			for i in $FontWeight.get_item_count():
+				if $FontWeight.get_item_text(i).to_lower().replace(" ", "_") == font_and_weight_name.weight_name:
+					$FontWeight.selected = i
+					return true
 	return false
 
-func update_font_weight_select():
+func reflect_font_size_control():
+	var dynamic_font = focused_object.get(PROPERTY_FONT) if focused_object else null
+	$FontSize.text = str(dynamic_font.size) if dynamic_font else str(DEFAULT_FONT_SIZE)
+	$FontSize.mouse_filter = Control.MOUSE_FILTER_IGNORE if dynamic_font == null else Control.MOUSE_FILTER_STOP
+	var font_size_color = Color.white
+	font_size_color.a = 0.5 if dynamic_font == null else 1
+	$FontSize.set(PROPERTY_FONT_COLOR, font_size_color)
+	$FontSize/FontSizePreset.disabled = dynamic_font == null
+
+func reflect_bold_italic_control():
+	var font_name = $FontFamily.get_item_text($FontFamily.selected)
+	var weight_name = $FontWeight.get_item_text($FontWeight.selected).to_lower().replace(" ", "_") if font_name != "None" else ""
+	var font_data = font_manager.get_font_data(font_name)
+
+	$Bold.disabled = not font_data.weights.bold if font_data else true
+	$Italic.disabled = not font_data.weights.regular_italic if font_data else true
+	$Bold.pressed = false
+	$Italic.pressed = false
+	match weight_name:
+		"bold_italic":
+			$Bold.pressed = true
+			$Italic.pressed = true
+		"bold":
+			$Bold.pressed = true
+		_:
+			if weight_name.find("italic") > -1:
+				$Italic.pressed = true
+
+func reflect_font_color_control():
+	var focused_object_font_color = focused_object.get(PROPERTY_FONT_COLOR) if focused_object else null
+	var font_color = Color.white
+	if focused_object_font_color != null:
+		font_color = focused_object_font_color
+	$FontColor/ColorRect.color = font_color
+	$FontColor/PopupPanel/ColorPicker.color = font_color
+
+func reflect_highlight_control():
+	var focused_object_highlight = focused_object.get(PROPERTY_HIGHLIGHT) if focused_object else null
+	var highlight = Color.white # default modulate color
+	if focused_object_highlight != null:
+		if focused_object_highlight is StyleBoxFlat:
+			highlight = focused_object_highlight.bg_color
+	$Highlight/ColorRect.color = highlight
+	$Highlight/PopupPanel/ColorPicker.color = highlight
+
+func reflect_align_control():
+	var align = focused_object.get(PROPERTY_ALIGN) if focused_object else null
+	$AlignLeft.pressed = false
+	$AlignCenter.pressed = false
+	$AlignRight.pressed = false
+	if align != null:
+		$AlignLeft.disabled = false
+		$AlignCenter.disabled = false
+		$AlignRight.disabled = false
+		match align:
+			Label.ALIGN_LEFT:
+				$AlignLeft.pressed = true
+			Label.ALIGN_CENTER:
+				$AlignCenter.pressed = true
+			Label.ALIGN_RIGHT:
+				$AlignRight.pressed = true
+	else:
+		$AlignLeft.disabled = true
+		$AlignCenter.disabled = true
+		$AlignRight.disabled = true
+
+func reflect_font_style_control():
+	# Font Style is not required to be accurate
+	var dynamic_font = focused_object.get(PROPERTY_FONT) if focused_object else null
+	$FontStyle.disabled = dynamic_font == null
+
+func reset_font_family_control():
+	$FontFamily.selected = $FontFamily.get_item_count() - 1
+	$FontWeight.clear()
+
+func reset_font_weight_control():
 	var font_name = $FontFamily.get_item_text($FontFamily.selected)
 	var font_data = font_manager.get_font_data(font_name)
 	$FontWeight.clear()
@@ -140,14 +232,6 @@ func update_font_weight_select():
 
 		if font_data.weights.get(property):
 			$FontWeight.add_item(property.capitalize())
-
-# Reflect selected object font weight to FontFamily
-func reflect_font_weight(weight_name):
-	for i in $FontWeight.get_item_count():
-		if $FontWeight.get_item_text(i).to_lower().replace(" ", "_") == weight_name:
-			$FontWeight.selected = i
-			return true
-	return false
 
 func _on_FontFamily_item_selected(index):
 	if not focused_object:
@@ -170,7 +254,7 @@ func _on_FontFamily_item_selected(index):
 		dynamic_font.size = int($FontSize/FontSizePreset.get_item_text($FontSize/FontSizePreset.selected)) # TODO: set_font_size
 		change_font(focused_object, dynamic_font)
 	else:
-		change_font_data(focused_object, font_data.weights.regular)
+		change_font_data(focused_object, font_data.weights.regular) # TODO: Get fallback weight if regular not found
 
 func _on_FontWeight_item_selected(index):
 	if not focused_object:
@@ -390,93 +474,20 @@ func _on_RectSizeRefresh_pressed():
 		focused_object.set("rect_size", Vector2.ZERO)
 
 func _on_focused_object_changed(new_focused_object):
-	var dynamic_font
-	var focused_object_highlight
-	var focused_object_font_color
-	var align
-
-	if new_focused_object:
-		dynamic_font = new_focused_object.get(PROPERTY_FONT)
-		focused_object_highlight = new_focused_object.get(PROPERTY_HIGHLIGHT)
-		focused_object_font_color = new_focused_object.get(PROPERTY_FONT_COLOR)
-		align = new_focused_object.get(PROPERTY_ALIGN)
-
-	$Bold.disabled = true
-	$Italic.disabled = true
-	$Underline.disabled = true
-	$Bold.pressed = false
-	$Italic.pressed = false
-	$Underline.pressed = false
-
-	$FontSize.text = str(dynamic_font.size) if dynamic_font else str(DEFAULT_FONT_SIZE)
-	$FontSize.mouse_filter = Control.MOUSE_FILTER_IGNORE if dynamic_font == null else Control.MOUSE_FILTER_STOP
-	var font_size_color = Color.white
-	font_size_color.a = 0.5 if dynamic_font == null else 1
-	$FontSize.set(PROPERTY_FONT_COLOR, font_size_color)
-	$FontSize/FontSizePreset.disabled = dynamic_font == null
-	
-	var font_color = Color.white
-	if focused_object_font_color != null:
-		font_color = focused_object_font_color
-	$FontColor/ColorRect.color = font_color
-	$FontColor/PopupPanel/ColorPicker.color = font_color
-
-	var highlight = Color.white # default modulate color
-	if focused_object_highlight != null:
-		if focused_object_highlight is StyleBoxFlat:
-			highlight = focused_object_highlight.bg_color
-	$Highlight/ColorRect.color = highlight
-	$Highlight/PopupPanel/ColorPicker.color = highlight
-
-	$FontStyle.disabled = dynamic_font == null
-	if dynamic_font:
-		if dynamic_font.font_data:
-			var font_and_weight_name = font_manager.get_font_and_weight_name(dynamic_font.font_data)
-			var font_data = font_manager.get_font_data(font_and_weight_name.font_name)
-			var current_weight_name = font_and_weight_name.weight_name.capitalize().replace("_", " ")
-			for i in $FontFamily.get_item_count():
-				if $FontFamily.get_item_text(i) == font_and_weight_name.font_name:
-					$FontFamily.selected = i
-					_on_FontFamily_item_selected(i)
-					break
-			
-			for i in $FontWeight.get_item_count():
-				if $FontWeight.get_item_text(i) == current_weight_name:
-					$FontWeight.selected = i
-					_on_FontWeight_item_selected(i)
-					break
-		else:
-			$FontFamily.selected = $FontFamily.get_item_count() - 1
-			$FontWeight.clear()
-	else:
-		$FontFamily.selected = $FontFamily.get_item_count() - 1 # 'None' always is the last item
-		$FontWeight.clear()
-
-	$AlignLeft.pressed = false
-	$AlignCenter.pressed = false
-	$AlignRight.pressed = false
-	if align != null:
-		$AlignLeft.disabled = false
-		$AlignCenter.disabled = false
-		$AlignRight.disabled = false
-		match align:
-			Label.ALIGN_LEFT:
-				$AlignLeft.pressed = true
-			Label.ALIGN_CENTER:
-				$AlignCenter.pressed = true
-			Label.ALIGN_RIGHT:
-				$AlignRight.pressed = true
-	else:
-		$AlignLeft.disabled = true
-		$AlignCenter.disabled = true
-		$AlignRight.disabled = true
+	reflect_font_family_control() # Font family must be reflected first
+	reflect_font_size_control()
+	reflect_font_color_control()
+	reflect_highlight_control()
+	reflect_bold_italic_control()
+	reflect_align_control()
+	reflect_font_style_control()
 
 func _on_font_data_changed(new_font_data):
 	var font_and_weight_name = font_manager.get_font_and_weight_name(new_font_data)
 	# TODO: Change name of FontManager.FontData, current new_font_data != font_data
 	var font_data = font_manager.get_font_data(font_and_weight_name.font_name) 
 	if font_and_weight_name:
-		reflect_font_family(font_and_weight_name.font_name, font_and_weight_name.weight_name)
+		reflect_font_family_control()
 
 	$Bold.disabled = not font_data.weights.bold
 	$Italic.disabled = not font_data.weights.regular_italic
@@ -498,18 +509,16 @@ func _on_font_changed(new_font):
 	var font_name = $FontFamily.get_item_text($FontFamily.selected)
 	var font_data = font_manager.get_font_data(font_name)
 	if not new_font:
-		$FontFamily.selected = $FontFamily.get_item_count() - 1
-		$FontWeight.clear()
+		reset_font_family_control()
 	else:
 		if not font_data: # Current font not equal to FontFamily selected
 			var font_and_weight_name = font_manager.get_font_and_weight_name(new_font.font_data)
 			font_data = font_manager.get_font_data(font_and_weight_name.font_name)
 			if font_and_weight_name:
-				reflect_font_family(font_and_weight_name.font_name, font_and_weight_name.weight_name)
+				reflect_font_family_control()
 		else:
-			var font_and_weight_name = font_manager.get_font_and_weight_name(new_font.font_data)
-			update_font_weight_select()
-			reflect_font_weight(font_and_weight_name.weight_name)
+			reset_font_weight_control()
+			reflect_font_weight_control()
 
 	$FontSize/FontSizePreset.disabled = false
 	$FontSize.mouse_filter = Control.MOUSE_FILTER_STOP
