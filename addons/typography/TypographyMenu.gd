@@ -487,7 +487,16 @@ func _on_FontClear_pressed():
 	if not focused_object:
 		return
 
-	change_font(focused_object, null)
+	if focused_object is RichTextLabel:
+		var to = {
+			"regular": null,
+			"bold": null,
+			"regular_italic": null,
+			"bold_italic": null
+		}
+		change_rich_text_fonts(focused_object, to)
+	else:
+		change_font(focused_object, null)
 
 	_on_focused_object_changed(focused_object) # Update ui default state
 
