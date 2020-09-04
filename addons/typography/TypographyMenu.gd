@@ -8,8 +8,15 @@ signal property_edited(name)
 const CONFIG_DIR = "res://addons/typography/plugin.cfg"
 const CONFIG_SECTION_META = "meta"
 const CONFIG_KEY_FONTS_DIR = "fonts_dir"
+# Generic font properties
 const PROPERTY_FONT_COLOR = "custom_colors/font_color"
 const PROPERTY_FONT = "custom_fonts/font"
+# RichTextLabel font properties
+const PROPERTY_FONT_NORMAL = "custom_fonts/normal_font"
+const PROPERTY_FONT_BOLD = "custom_fonts/bold_font"
+const PROPERTY_FONT_ITALIC = "custom_fonts/italics_font"
+const PROPERTY_FONT_BOLD_ITALIC = "custom_fonts/bold_italics_font"
+# Others generic properties
 const PROPERTY_HIGHLIGHT = "custom_styles/normal"
 const PROPERTY_ALIGN = "align"
 
@@ -83,6 +90,17 @@ func change_font_data(object, to):
 	undo_redo.create_action("Change Font Data")
 	undo_redo.add_do_method(self, "set_font_data", object, to if to else false) # Godot bug, varargs ignore null
 	undo_redo.add_undo_method(self, "set_font_data", object, from if from else false)
+	undo_redo.commit_action()
+
+func change_rich_text_fonts(object, to):
+	var from = {}
+	from["regular"] = object.get(PROPERTY_FONT_NORMAL)
+	from["bold"] = object.get(PROPERTY_FONT_BOLD)
+	from["regular_italic"] = object.get(PROPERTY_FONT_ITALIC)
+	from["bold_italic"] = object.get(PROPERTY_FONT_BOLD_ITALIC)
+	undo_redo.create_action("Change Rich Text Fonts")
+	undo_redo.add_do_method(self, "set_rich_text_fonts", object, to if to else false) # Godot bug, varargs ignore null
+	undo_redo.add_undo_method(self, "set_rich_text_fonts", object, from if from else false)
 	undo_redo.commit_action()
 
 func change_font_size(object, to):
@@ -225,6 +243,12 @@ func reset_font_name_control():
 	$FontWeight.clear()
 
 func reset_font_weight_control():
+	if focused_object is RichTextLabel:
+		$FontWeight.disabled = true
+		return
+	else:
+		$FontWeight.disabled = false
+
 	var font_name = $FontName.get_item_text($FontName.selected)
 	var font_resource = font_manager.get_font_resource(font_name)
 	$FontWeight.clear()
@@ -244,22 +268,31 @@ func _on_FontName_item_selected(index):
 		_on_FontClear_pressed()
 		return
 
-	var dynamic_font = focused_object.get(PROPERTY_FONT)
 	var font_resource = font_manager.get_font_resource(font_name)
 	if not font_resource:
 		return
 
-	if not dynamic_font:
-		dynamic_font = DynamicFont.new()
-		dynamic_font.use_filter = true
-		dynamic_font.font_data = font_resource.weights.regular
-		dynamic_font.size = int($FontSize/FontSizePreset.get_item_text($FontSize/FontSizePreset.selected))
-		change_font(focused_object, dynamic_font)
+	if focused_object is RichTextLabel:
+		var to = {}
+		to["regular"] = create_new_font_obj(font_resource.weights.regular) if font_resource.weights.regular else null
+		to["bold"] = create_new_font_obj(font_resource.weights.bold) if font_resource.weights.bold else null
+		to["regular_italic"] = create_new_font_obj(font_resource.weights.regular_italic) if font_resource.weights.regular_italic else null
+		to["bold_italic"] = create_new_font_obj(font_resource.weights.bold_italic) if font_resource.weights.bold_italic else null
+		change_rich_text_fonts(focused_object, to)
 	else:
-		change_font_data(focused_object, font_resource.weights.regular) # TODO: Get fallback weight if regular not found
+		var dynamic_font = focused_object.get(PROPERTY_FONT)
+		if not dynamic_font:
+			var font_size = int($FontSize/FontSizePreset.get_item_text($FontSize/FontSizePreset.selected))
+			dynamic_font = create_new_font_obj(font_resource.weights.regular, font_size)
+			change_font(focused_object, dynamic_font)
+		else:
+			change_font_data(focused_object, font_resource.weights.regular) # TODO: Get fallback weight if regular not found
 
 func _on_FontWeight_item_selected(index):
 	if not focused_object:
+		return
+
+	if focused_object is RichTextLabel:
 		return
 
 	var font_name = $FontName.get_item_text($FontName.selected)
@@ -502,6 +535,10 @@ func _on_font_changed(new_font):
 	reflect_font_style_control()
 	emit_signal("property_edited", PROPERTY_FONT)
 
+func _on_rich_text_fonts_changed(fonts):
+	# TODO: Reflect font name of rich text font
+	emit_signal("property_edited", PROPERTY_FONT)
+
 func _on_font_size_changed(new_font_size):
 	var new_font_size_str = str(new_font_size)
 	$FontSize.text = new_font_size_str
@@ -530,9 +567,6 @@ func _on_focused_inspector_changed(new_inspector):
 	pass
 
 func set_font_data(object, font_data):
-	if object is RichTextLabel:
-		object.get("custom_fonts/normal_font").font_data
-
 	font_data = font_data if font_data else null # font might be bool false, as Godot ignore null for varargs
 	object.get(PROPERTY_FONT).font_data = font_data
 	_on_font_data_changed(font_data)
@@ -541,6 +575,13 @@ func set_font(object, font):
 	font = font if font else null 
 	object.set(PROPERTY_FONT, font) 
 	_on_font_changed(font)
+
+func set_rich_text_fonts(object, fonts):
+	object.set(PROPERTY_FONT_NORMAL, fonts.regular)
+	object.set(PROPERTY_FONT_BOLD, fonts.bold)
+	object.set(PROPERTY_FONT_ITALIC, fonts.regular_italic)
+	object.set(PROPERTY_FONT_BOLD_ITALIC, fonts.bold_italic)
+	_on_rich_text_fonts_changed(fonts)
 
 func set_font_size(object, font_size):
 	object.get(PROPERTY_FONT).size = font_size
@@ -590,6 +631,14 @@ func set_focused_inspector(insp):
 	if focused_inspector != insp:
 		focused_inspector = insp
 		_on_focused_inspector_changed(focused_inspector)
+
+func create_new_font_obj(font_data, size=null):
+	var font  = DynamicFont.new()
+	font.use_filter = true
+	font.font_data = font_data
+	if size:
+		font.size = size
+	return font
 
 func can_bold_active(font_data):
 	if $Italic.pressed:
