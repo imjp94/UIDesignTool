@@ -7,6 +7,8 @@ var menu
 var overlay_text_edit
 var editor_inspector = get_editor_interface().get_inspector()
 
+var _object_orig_text = ""
+
 
 func _enter_tree():
 	menu = TypographyMenu.instance()
@@ -61,6 +63,8 @@ func _on_double_click_object(object):
 		overlay_text_edit.text = object.text
 		overlay_text_edit.grab_focus()
 
+		_object_orig_text = object.text
+
 func _on_OverlayTextEdit_text_changed():
 	if menu.focused_object:
 		# TODO: Option to set bbcode_text if is RichTextLabel
@@ -72,10 +76,25 @@ func _on_OverlayTextEdit_focused_exited():
 
 	if overlay_text_edit.get_parent():
 		overlay_text_edit.get_parent().remove_child(overlay_text_edit)
+		# TODO: More efficient way to handle undo/redo of text, right now, whole chunks of string is cached everytime
+		change_text(menu.focused_object, overlay_text_edit.text)
 
 func _on_property_selected(property):
 	menu.focused_property = property
 	menu.focused_inspector = editor_inspector.get_focus_owner()
 
 func _on_TypographyMenu_property_edited(property):
+	editor_inspector.refresh()
+
+func change_text(object, to):
+	var from = _object_orig_text
+	var undo_redo = get_undo_redo()
+	undo_redo.create_action("Change Text")
+	undo_redo.add_do_method(self, "set_text", object, to)
+	undo_redo.add_undo_method(self, "set_text", object, from)
+	undo_redo.commit_action()
+	_object_orig_text = ""
+
+func set_text(object, text):
+	object.set("text", text)
 	editor_inspector.refresh()
