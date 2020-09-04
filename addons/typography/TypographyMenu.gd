@@ -16,6 +16,7 @@ const PROPERTY_FONT_NORMAL = "custom_fonts/normal_font"
 const PROPERTY_FONT_BOLD = "custom_fonts/bold_font"
 const PROPERTY_FONT_ITALIC = "custom_fonts/italics_font"
 const PROPERTY_FONT_BOLD_ITALIC = "custom_fonts/bold_italics_font"
+const PROPERTY_FONT_COLOR_DEFAULT = "custom_colors/default_color"
 # Others generic properties
 const PROPERTY_HIGHLIGHT = "custom_styles/normal"
 const PROPERTY_ALIGN = "align"
@@ -403,14 +404,20 @@ func _on_FontColor_pressed():
 	$FontColor/PopupPanel.popup()
 
 	if focused_object:
-		_object_orig_font_color = focused_object.get(PROPERTY_FONT_COLOR)
+		if focused_object is RichTextLabel:
+			_object_orig_font_color = focused_object.get(PROPERTY_FONT_COLOR_DEFAULT) 
+		else:
+			_object_orig_font_color = focused_object.get(PROPERTY_FONT_COLOR) 
 
 func _on_FontColor_ColorPicker_color_changed(color):
 	if not focused_object:
 		return
 
 	# Preview only, doesn't stack undo/redo as this is called very frequently
-	focused_object.set(PROPERTY_FONT_COLOR, $FontColor/PopupPanel/ColorPicker.color)
+	if focused_object is RichTextLabel:
+		focused_object.set(PROPERTY_FONT_COLOR_DEFAULT, $FontColor/PopupPanel/ColorPicker.color)
+	else:
+		focused_object.set(PROPERTY_FONT_COLOR, $FontColor/PopupPanel/ColorPicker.color)
 	$FontColor/ColorRect.color = $FontColor/PopupPanel/ColorPicker.color
 
 func _on_FontColor_PopupPanel_popup_hide():
@@ -488,7 +495,10 @@ func _on_ColorClear_pressed():
 	if not focused_object:
 		return
 
-	_object_orig_font_color = focused_object.get(PROPERTY_FONT_COLOR)
+	if focused_object is RichTextLabel:
+		_object_orig_font_color = focused_object.get(PROPERTY_FONT_COLOR_DEFAULT) 
+	else:
+		_object_orig_font_color = focused_object.get(PROPERTY_FONT_COLOR) 
 	_object_orig_highlight = focused_object.get(PROPERTY_HIGHLIGHT)
 	change_font_color(focused_object, null)
 	change_highlight(focused_object, null)
@@ -589,7 +599,10 @@ func set_font_size(object, font_size):
 
 func set_font_color(object, font_color):
 	font_color = font_color if font_color else null
-	object.set(PROPERTY_FONT_COLOR, font_color)
+	if object is RichTextLabel:
+		object.set(PROPERTY_FONT_COLOR_DEFAULT, font_color)
+	else:
+		object.set(PROPERTY_FONT_COLOR, font_color)
 	_on_font_color_changed(font_color)
 
 func set_highlight(object, highlight):
