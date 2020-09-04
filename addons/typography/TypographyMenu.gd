@@ -308,51 +308,39 @@ func _on_Bold_pressed():
 	if not focused_object:
 		return
 
-	if focused_object is RichTextLabel:
-		if focused_property == "bbcode_text" and focused_inspector is TextEdit:
-			print(focused_inspector.get_selection_text())
-			Utils.markup_text_edit_selection(focused_inspector, "[b]", "[/b]")
-	else:
-		var font_resource = _bold_or_italic()
+	var font_resource = _bold_or_italic()
+	if not font_resource:
+		return
 
-		if not font_resource:
-			return
-
-		var bold = $Bold.pressed
-		var italic = $Italic.pressed
-		if bold == italic:
-			if not bold:
-				can_italic_active(font_resource)
-		else:
+	var bold = $Bold.pressed
+	var italic = $Italic.pressed
+	if bold == italic:
+		if not bold:
 			can_italic_active(font_resource)
+	else:
+		can_italic_active(font_resource)
 
-		if $Italic.disabled:
-			$Italic.pressed = false
+	if $Italic.disabled:
+		$Italic.pressed = false
 
 func _on_Italic_pressed():
 	if not focused_object:
 		return
 
-	if focused_object is RichTextLabel:
-		if focused_property == "bbcode_text" and focused_inspector is TextEdit:
-			print(focused_inspector.get_selection_text())
-			Utils.markup_text_edit_selection(focused_inspector, "[i]", "[/i]")
-	else:
-		var font_resource = _bold_or_italic()
+	var font_resource = _bold_or_italic()
+	if not font_resource:
+		return
 
-		if not font_resource:
-			return
-
-		var bold = $Italic.pressed
-		var italic = $Bold.pressed
-		if bold == italic:
-			if not bold:
-				can_bold_active(font_resource)
-		else:
+	var bold = $Italic.pressed
+	var italic = $Bold.pressed
+	if bold == italic:
+		if not bold:
 			can_bold_active(font_resource)
+	else:
+		can_bold_active(font_resource)
 
-		if $Bold.disabled:
-			$Bold.pressed = false
+	if $Bold.disabled:
+		$Bold.pressed = false
 
 func _bold_or_italic():
 	var bold = $Bold.pressed
