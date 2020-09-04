@@ -253,7 +253,7 @@ func _on_FontName_item_selected(index):
 		dynamic_font = DynamicFont.new()
 		dynamic_font.use_filter = true
 		dynamic_font.font_data = font_resource.weights.regular
-		dynamic_font.size = int($FontSize/FontSizePreset.get_item_text($FontSize/FontSizePreset.selected)) # TODO: set_font_size
+		dynamic_font.size = int($FontSize/FontSizePreset.get_item_text($FontSize/FontSizePreset.selected))
 		change_font(focused_object, dynamic_font)
 	else:
 		change_font_data(focused_object, font_resource.weights.regular) # TODO: Get fallback weight if regular not found
@@ -530,6 +530,9 @@ func _on_focused_inspector_changed(new_inspector):
 	pass
 
 func set_font_data(object, font_data):
+	if object is RichTextLabel:
+		object.get("custom_fonts/normal_font").font_data
+
 	font_data = font_data if font_data else null # font might be bool false, as Godot ignore null for varargs
 	object.get(PROPERTY_FONT).font_data = font_data
 	_on_font_data_changed(font_data)
