@@ -1,19 +1,5 @@
 extends Object
 
-enum FONT_WEIGHT_FALLBACK {
-	DEFAULT,
-	THIN,
-	EXTRA_LIGHT,
-	LIGHT,
-	REGULAR,
-	MEDIUM,
-	SEMI_BOLD,
-	BOLD,
-	EXTRA_BOLD,
-	BLACK,
-	EXTRA_BLACK,
-}
-
 const FONT_FILE_PATTERN = "\\.ttf$"
 const FONT_WEIGHT_PATTERNS = {
 	"thin": "(?i)-thin",

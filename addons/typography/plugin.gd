@@ -1,7 +1,7 @@
 tool
 extends EditorPlugin
-const TypographyMenu = preload("TypographyMenu.tscn")
-const OverlayTextEdit = preload("OverlayTextEdit.tscn")
+const TypographyMenu = preload("scenes/TypographyMenu.tscn")
+const OverlayTextEdit = preload("scenes/OverlayTextEdit.tscn")
 
 var menu
 var overlay_text_edit
@@ -63,6 +63,7 @@ func _on_double_click_object(object):
 
 func _on_OverlayTextEdit_text_changed():
 	if menu.focused_object:
+		# TODO: Option to set bbcode_text if is RichTextLabel
 		menu.focused_object.set("text", overlay_text_edit.text)
 
 func _on_OverlayTextEdit_focused_exited():

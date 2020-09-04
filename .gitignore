@@ -1,5 +1,5 @@
 build/
-assets/
+assets/*
 addons/*
 !addons/typography
 

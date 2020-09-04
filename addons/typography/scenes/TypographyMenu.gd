@@ -1,7 +1,7 @@
 tool
 extends Control
-const Utils = preload("Utils.gd")
-const FontManager = preload("FontManager.gd")
+const Utils = preload("../scripts/Utils.gd")
+const FontManager = preload("../scripts/FontManager.gd")
 
 signal property_edited(name)
 
