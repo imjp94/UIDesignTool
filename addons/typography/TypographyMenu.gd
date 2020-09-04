@@ -34,12 +34,12 @@ func _init():
 		print("An error occurred when trying to access the path, ERROR: ", result)
 
 func _ready():
-	# FontFamily
-	$FontFamily.connect("item_selected", self, "_on_FontFamily_item_selected")
+	# FontName
+	$FontName.connect("item_selected", self, "_on_FontName_item_selected")
 	$FontWeight.connect("item_selected", self, "_on_FontWeight_item_selected")
-	$FontFamilyLoadButton/FontFamilyFileDialog.connect("dir_selected", self, "_on_FontFamilyFileDialog_dir_selected")
-	$FontFamilyLoadButton.connect("pressed", self, "_on_FontFamilyLoadButton_pressed")
-	$FontFamilyRefresh.connect("pressed", self, "_on_FontFamilyRefresh_pressed")
+	$FontNameLoadButton/FontNameFileDialog.connect("dir_selected", self, "_on_FontNameFileDialog_dir_selected")
+	$FontNameLoadButton.connect("pressed", self, "_on_FontNameLoadButton_pressed")
+	$FontNameRefresh.connect("pressed", self, "_on_FontNameRefresh_pressed")
 	# FontSize
 	$FontSize/FontSizePreset.connect("item_selected", self, "_on_FontSizePreset_item_selected")
 	$FontSize.connect("text_entered", self, "_on_FontSize_text_entered")
@@ -69,7 +69,7 @@ func _ready():
 
 	var fonts_dir = config.get_value(CONFIG_SECTION_META, CONFIG_KEY_FONTS_DIR, "")
 	if not fonts_dir.empty():
-		_on_FontFamilyFileDialog_dir_selected(fonts_dir)
+		_on_FontNameFileDialog_dir_selected(fonts_dir)
 
 func change_font(object, to):
 	var from = object.get(PROPERTY_FONT)
@@ -120,21 +120,21 @@ func change_font_style(object, to):
 	undo_redo.add_undo_method(self, "set_font_style", object, from if from else false)
 	undo_redo.commit_action()
 
-func reflect_font_family_control():
+func reflect_font_name_control():
 	var dynamic_font = focused_object.get(PROPERTY_FONT) if focused_object else null
 	if dynamic_font:
 		if dynamic_font.font_data:
 			var font_and_weight_name = font_manager.get_font_and_weight_name(dynamic_font.font_data)
-			for i in $FontFamily.get_item_count():
-				if $FontFamily.get_item_text(i) == font_and_weight_name.font_name:
-					$FontFamily.selected = i
+			for i in $FontName.get_item_count():
+				if $FontName.get_item_text(i) == font_and_weight_name.font_name:
+					$FontName.selected = i
 					reset_font_weight_control()
 					reflect_font_weight_control()
 					break
 		else:
-			reset_font_family_control()
+			reset_font_name_control()
 	else:
-		reset_font_family_control()
+		reset_font_name_control()
 
 func reflect_font_weight_control():
 	var dynamic_font = focused_object.get(PROPERTY_FONT) if focused_object else null
@@ -157,7 +157,7 @@ func reflect_font_size_control():
 	$FontSize/FontSizePreset.disabled = dynamic_font == null
 
 func reflect_bold_italic_control():
-	var font_name = $FontFamily.get_item_text($FontFamily.selected)
+	var font_name = $FontName.get_item_text($FontName.selected)
 	var weight_name = $FontWeight.get_item_text($FontWeight.selected).to_lower().replace(" ", "_") if font_name != "None" else ""
 	var font_resource = font_manager.get_font_resource(font_name)
 
@@ -220,12 +220,12 @@ func reflect_font_style_control():
 	var dynamic_font = focused_object.get(PROPERTY_FONT) if focused_object else null
 	$FontStyle.disabled = dynamic_font == null
 
-func reset_font_family_control():
-	$FontFamily.selected = $FontFamily.get_item_count() - 1
+func reset_font_name_control():
+	$FontName.selected = $FontName.get_item_count() - 1
 	$FontWeight.clear()
 
 func reset_font_weight_control():
-	var font_name = $FontFamily.get_item_text($FontFamily.selected)
+	var font_name = $FontName.get_item_text($FontName.selected)
 	var font_resource = font_manager.get_font_resource(font_name)
 	$FontWeight.clear()
 	for property in inst2dict(font_resource.weights).keys():
@@ -235,11 +235,11 @@ func reset_font_weight_control():
 		if font_resource.weights.get(property):
 			$FontWeight.add_item(property.capitalize())
 
-func _on_FontFamily_item_selected(index):
+func _on_FontName_item_selected(index):
 	if not focused_object:
 		return
 
-	var font_name = $FontFamily.get_item_text(index)
+	var font_name = $FontName.get_item_text(index)
 	if font_name == "None":
 		_on_FontClear_pressed()
 		return
@@ -262,7 +262,7 @@ func _on_FontWeight_item_selected(index):
 	if not focused_object:
 		return
 
-	var font_name = $FontFamily.get_item_text($FontFamily.selected)
+	var font_name = $FontName.get_item_text($FontName.selected)
 	var weight_name = $FontWeight.get_item_text(index).to_lower().replace(" ", "_")
 	var font_resource = font_manager.get_font_resource(font_name)
 	
@@ -270,26 +270,26 @@ func _on_FontWeight_item_selected(index):
 	if dynamic_font:
 		change_font_data(focused_object, font_resource.weights.get(weight_name))
 	
-func _on_FontFamilyLoadButton_pressed():
-	$FontFamilyLoadButton/FontFamilyFileDialog.popup()
+func _on_FontNameLoadButton_pressed():
+	$FontNameLoadButton/FontNameFileDialog.popup()
 
-func _on_FontFamilyFileDialog_dir_selected(dir):
+func _on_FontNameFileDialog_dir_selected(dir):
 	selected_font_root_dir = dir
 	# Load fonts
 	if font_manager.load_root_dir(dir):
-		$FontFamily.clear()
+		$FontName.clear()
 		for font_data in font_manager.font_resources:
-			$FontFamily.add_item(font_data.name)
-		$FontFamily.add_item("None")
+			$FontName.add_item(font_data.name)
+		$FontName.add_item("None")
 
-		reflect_font_family_control()
+		reflect_font_name_control()
 		config.set_value(CONFIG_SECTION_META, CONFIG_KEY_FONTS_DIR, dir)
 		config.save(CONFIG_DIR)
 	else:
 		print("Failed to load fonts")
 
-func _on_FontFamilyRefresh_pressed():
-	_on_FontFamilyFileDialog_dir_selected(selected_font_root_dir)
+func _on_FontNameRefresh_pressed():
+	_on_FontNameFileDialog_dir_selected(selected_font_root_dir)
 
 func _on_FontSizePreset_item_selected(index):
 	if not focused_object:
@@ -358,8 +358,8 @@ func _bold_or_italic():
 	var bold = $Bold.pressed
 	var italic = $Italic.pressed
 
-	var font_family = $FontFamily.get_item_text($FontFamily.selected)
-	var font_resource = font_manager.get_font_resource(font_family)
+	var font_name = $FontName.get_item_text($FontName.selected)
+	var font_resource = font_manager.get_font_resource(font_name)
 	if not font_resource:
 		return null
 	
@@ -477,7 +477,7 @@ func _on_RectSizeRefresh_pressed():
 		focused_object.set("rect_size", Vector2.ZERO)
 
 func _on_focused_object_changed(new_focused_object):
-	reflect_font_family_control() # Font family must be reflected first
+	reflect_font_name_control() # Font family must be reflected first
 	reflect_font_size_control()
 	reflect_font_color_control()
 	reflect_highlight_control()
@@ -489,22 +489,22 @@ func _on_font_data_changed(new_font_data):
 	var font_and_weight_name = font_manager.get_font_and_weight_name(new_font_data)
 	var font_resource = font_manager.get_font_resource(font_and_weight_name.font_name)
 	if font_and_weight_name:
-		reflect_font_family_control()
+		reflect_font_name_control()
 
 	reflect_bold_italic_control()
 	emit_signal("property_edited", PROPERTY_FONT)
 
 func _on_font_changed(new_font):
-	var font_name = $FontFamily.get_item_text($FontFamily.selected)
+	var font_name = $FontName.get_item_text($FontName.selected)
 	var font_resource = font_manager.get_font_resource(font_name)
 	if not new_font:
-		reset_font_family_control()
+		reset_font_name_control()
 	else:
-		if not font_resource: # Current font not equal to FontFamily selected
+		if not font_resource: # Current font not equal to FontName selected
 			var font_and_weight_name = font_manager.get_font_and_weight_name(new_font.font_data)
 			font_resource = font_manager.get_font_resource(font_and_weight_name.font_name)
 			if font_and_weight_name:
-				reflect_font_family_control()
+				reflect_font_name_control()
 		else:
 			reset_font_weight_control()
 			reflect_font_weight_control()
@@ -573,7 +573,7 @@ func set_font_style(object, font_style):
 	if not font_style:
 		return
 
-	var font_data = font_manager.get_font_resource($FontFamily.get_item_text($FontFamily.selected)).weights.get(font_style.weight)
+	var font_data = font_manager.get_font_resource($FontName.get_item_text($FontName.selected)).weights.get(font_style.weight)
 	if not font_data:
 		# Use current weight if desired weight not found
 		font_data = object.get(PROPERTY_FONT).font_data
