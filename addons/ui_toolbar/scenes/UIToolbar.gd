@@ -176,25 +176,31 @@ func reflect_font_size_control():
 	$FontSize/FontSizePreset.disabled = dynamic_font == null
 
 func reflect_bold_italic_control():
-	var font_name = $FontName.get_item_text($FontName.selected)
-	var weight_name = $FontWeight.get_item_text($FontWeight.selected).to_lower().replace(" ", "_") if font_name != "None" else ""
-	var font_resource = font_manager.get_font_resource(font_name)
+	if $FontName.get_item_count():
+		var font_name = $FontName.get_item_text($FontName.selected)
+		var weight_name = $FontWeight.get_item_text($FontWeight.selected).to_lower().replace(" ", "_") if font_name != "None" else ""
+		var font_resource = font_manager.get_font_resource(font_name)
 
-	$Bold.disabled = not font_resource.weights.bold if font_resource else true
-	$Italic.disabled = not font_resource.weights.regular_italic if font_resource else true
-	$Bold.pressed = false
-	$Italic.pressed = false
-	match weight_name:
-		"bold_italic":
-			$Bold.pressed = true
-			$Italic.pressed = true
-		"bold":
-			$Bold.pressed = true
-			$Italic.disabled = not font_resource.weights.bold_italic
-		_:
-			if weight_name.find("italic") > -1:
+		$Bold.disabled = not font_resource.weights.bold if font_resource else true
+		$Italic.disabled = not font_resource.weights.regular_italic if font_resource else true
+		$Bold.pressed = false
+		$Italic.pressed = false
+		match weight_name:
+			"bold_italic":
+				$Bold.pressed = true
 				$Italic.pressed = true
-				$Bold.disabled = not font_resource.weights.bold_italic
+			"bold":
+				$Bold.pressed = true
+				$Italic.disabled = not font_resource.weights.bold_italic
+			_:
+				if weight_name.find("italic") > -1:
+					$Italic.pressed = true
+					$Bold.disabled = not font_resource.weights.bold_italic
+	else:
+		$Bold.disabled = true
+		$Italic.disabled = true
+		$Bold.pressed = false
+		$Italic.pressed = false
 
 func reflect_font_color_control():
 	var focused_object_font_color = focused_object.get(PROPERTY_FONT_COLOR) if focused_object else null
@@ -240,7 +246,8 @@ func reflect_font_style_control():
 	$FontStyle.disabled = dynamic_font == null
 
 func reset_font_name_control():
-	$FontName.selected = $FontName.get_item_count() - 1
+	if $FontName.get_item_count():
+		$FontName.selected = $FontName.get_item_count() - 1
 	$FontWeight.clear()
 
 func reset_font_weight_control():
@@ -250,15 +257,18 @@ func reset_font_weight_control():
 	else:
 		$FontWeight.disabled = false
 
-	var font_name = $FontName.get_item_text($FontName.selected)
-	var font_resource = font_manager.get_font_resource(font_name)
-	$FontWeight.clear()
-	for property in inst2dict(font_resource.weights).keys():
-		if property == "@subpath" or property == "@path":
-			continue
+	if $FontName.get_item_count():
+		var font_name = $FontName.get_item_text($FontName.selected)
+		var font_resource = font_manager.get_font_resource(font_name)
+		$FontWeight.clear()
+		for property in inst2dict(font_resource.weights).keys():
+			if property == "@subpath" or property == "@path":
+				continue
 
-		if font_resource.weights.get(property):
-			$FontWeight.add_item(property.capitalize())
+			if font_resource.weights.get(property):
+				$FontWeight.add_item(property.capitalize())
+	else:
+		$FontWeight.clear()
 
 func _on_FontName_item_selected(index):
 	if not focused_object:
