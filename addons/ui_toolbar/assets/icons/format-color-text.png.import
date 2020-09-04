@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/format-color-text.png-265bb65248b393b7ce8f764bbd0e12c8.stex"
+path="res://.import/format-color-text.png-f31b42ccb55ba8dfe920cf09538d5441.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/typography/assets/icons/format-color-text.png"
-dest_files=[ "res://.import/format-color-text.png-265bb65248b393b7ce8f764bbd0e12c8.stex" ]
+source_file="res://addons/ui_toolbar/assets/icons/format-color-text.png"
+dest_files=[ "res://.import/format-color-text.png-f31b42ccb55ba8dfe920cf09538d5441.stex" ]
 
 [params]
 

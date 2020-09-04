@@ -1,7 +1,7 @@
 build/
 assets/*
 addons/*
-!addons/typography
+!addons/ui_toolbar
 
 # Godot-specific ignores
 .import/

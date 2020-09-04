@@ -1,24 +1,22 @@
 [gd_scene load_steps=15 format=2]
 
-[ext_resource path="res://addons/typography/assets/icons/format_bold-white-18dp.svg" type="Texture" id=1]
-[ext_resource path="res://addons/typography/assets/icons/format_italic-white-18dp.svg" type="Texture" id=2]
-[ext_resource path="res://addons/typography/assets/icons/format_underlined-white-18dp.svg" type="Texture" id=3]
-[ext_resource path="res://addons/typography/assets/icons/format-color-text.png" type="Texture" id=4]
-[ext_resource path="res://addons/typography/scenes/TypographyMenu.gd" type="Script" id=5]
-[ext_resource path="res://addons/typography/assets/icons/folder_open-white-18dp.svg" type="Texture" id=6]
-[ext_resource path="res://addons/typography/assets/icons/refresh-white-18dp.svg" type="Texture" id=7]
-[ext_resource path="res://addons/typography/assets/icons/marker.png" type="Texture" id=8]
-[ext_resource path="res://addons/typography/assets/icons/format_clear-white-18dp.svg" type="Texture" id=9]
-[ext_resource path="res://addons/typography/assets/icons/format_color_reset-white-18dp.svg" type="Texture" id=10]
-[ext_resource path="res://addons/typography/assets/icons/photo_size_select_small-white-18dp.svg" type="Texture" id=11]
-[ext_resource path="res://addons/typography/assets/icons/format_align_center-white-18dp.svg" type="Texture" id=12]
-[ext_resource path="res://addons/typography/assets/icons/format_align_left-white-18dp.svg" type="Texture" id=13]
-[ext_resource path="res://addons/typography/assets/icons/format_align_right-white-18dp.svg" type="Texture" id=14]
+[ext_resource path="res://addons/ui_toolbar/assets/icons/format_bold-white-18dp.svg" type="Texture" id=1]
+[ext_resource path="res://addons/ui_toolbar/assets/icons/format_italic-white-18dp.svg" type="Texture" id=2]
+[ext_resource path="res://addons/ui_toolbar/assets/icons/format_underlined-white-18dp.svg" type="Texture" id=3]
+[ext_resource path="res://addons/ui_toolbar/assets/icons/format-color-text.png" type="Texture" id=4]
+[ext_resource path="res://addons/ui_toolbar/scenes/UIToolbar.gd" type="Script" id=5]
+[ext_resource path="res://addons/ui_toolbar/assets/icons/folder_open-white-18dp.svg" type="Texture" id=6]
+[ext_resource path="res://addons/ui_toolbar/assets/icons/refresh-white-18dp.svg" type="Texture" id=7]
+[ext_resource path="res://addons/ui_toolbar/assets/icons/marker.png" type="Texture" id=8]
+[ext_resource path="res://addons/ui_toolbar/assets/icons/format_clear-white-18dp.svg" type="Texture" id=9]
+[ext_resource path="res://addons/ui_toolbar/assets/icons/format_color_reset-white-18dp.svg" type="Texture" id=10]
+[ext_resource path="res://addons/ui_toolbar/assets/icons/photo_size_select_small-white-18dp.svg" type="Texture" id=11]
+[ext_resource path="res://addons/ui_toolbar/assets/icons/format_align_center-white-18dp.svg" type="Texture" id=12]
+[ext_resource path="res://addons/ui_toolbar/assets/icons/format_align_left-white-18dp.svg" type="Texture" id=13]
+[ext_resource path="res://addons/ui_toolbar/assets/icons/format_align_right-white-18dp.svg" type="Texture" id=14]
 
 
-
-
-[node name="TypographyMenu" type="HBoxContainer"]
+[node name="UIToolbar" type="HBoxContainer"]
 script = ExtResource( 5 )
 __meta__ = {
 "_edit_use_anchors_": false

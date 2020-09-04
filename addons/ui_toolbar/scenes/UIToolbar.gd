@@ -5,7 +5,7 @@ const FontManager = preload("../scripts/FontManager.gd")
 
 signal property_edited(name)
 
-const CONFIG_DIR = "res://addons/typography/plugin.cfg"
+const CONFIG_DIR = "res://addons/ui_toolbar/plugin.cfg" # Must be abosulte path
 const CONFIG_SECTION_META = "meta"
 const CONFIG_KEY_FONTS_DIR = "fonts_dir"
 # Generic font properties
@@ -39,7 +39,7 @@ var _object_orig_font_style
 func _init():
 	var result = config.load(CONFIG_DIR)
 	if config.load(CONFIG_DIR):
-		print("An error occurred when trying to access the path, ERROR: ", result)
+		push_warning("UIToolbar: An error occurred when trying to access %s, ERROR: %d" % [CONFIG_DIR, result])
 
 func _ready():
 	# FontName

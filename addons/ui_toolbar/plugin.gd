@@ -1,6 +1,6 @@
 tool
 extends EditorPlugin
-const TypographyMenu = preload("scenes/TypographyMenu.tscn")
+const UIToolbar = preload("scenes/UIToolbar.tscn")
 const OverlayTextEdit = preload("scenes/OverlayTextEdit.tscn")
 
 var menu
@@ -10,9 +10,9 @@ var editor_inspector = get_editor_interface().get_inspector()
 
 
 func _enter_tree():
-	menu = TypographyMenu.instance()
+	menu = UIToolbar.instance()
 	menu.undo_redo = get_undo_redo()
-	menu.connect("property_edited", self, "_on_TypographyMenu_property_edited")
+	menu.connect("property_edited", self, "_on_UIToolbar_property_edited")
 	overlay_text_edit = OverlayTextEdit.instance()
 	overlay_text_edit.undo_redo = get_undo_redo()
 	overlay_text_edit.connect("property_edited", self, "_on_OverlayTextEdit_property_edited")
@@ -57,7 +57,7 @@ func _on_property_selected(property):
 	menu.focused_property = property
 	menu.focused_inspector = editor_inspector.get_focus_owner()
 
-func _on_TypographyMenu_property_edited(property):
+func _on_UIToolbar_property_edited(property):
 	editor_inspector.refresh()
 
 func _on_OverlayTextEdit_property_edited(property):

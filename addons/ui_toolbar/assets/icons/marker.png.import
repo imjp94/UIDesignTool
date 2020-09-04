@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/folder_open-white-18dp.svg-1601f8e98ee4fbde1119f3a242b452cd.stex"
+path="res://.import/marker.png-e75fda9b8087d2e7ba785fda1085b509.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/typography/assets/icons/folder_open-white-18dp.svg"
-dest_files=[ "res://.import/folder_open-white-18dp.svg-1601f8e98ee4fbde1119f3a242b452cd.stex" ]
+source_file="res://addons/ui_toolbar/assets/icons/marker.png"
+dest_files=[ "res://.import/marker.png-e75fda9b8087d2e7ba785fda1085b509.stex" ]
 
 [params]
 
