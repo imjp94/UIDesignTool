@@ -134,7 +134,7 @@ func load_fonts(dir):
 		if not font_resource.weights.empty():
 			font_resources.append(font_resource)
 		else:
-			push_warning("UIToolbar: Unable to locate usable .ttf files from %s" % dir)
+			push_warning("UIToolbar: Unable to locate usable .ttf files from %s, check README.md for proper directory/filename structure" % dir)
 	else:
 		push_warning("UIToolbar: An error occurred when trying to access %s, ERROR: %d" % [dir, result])
 		return false
