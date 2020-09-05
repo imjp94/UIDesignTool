@@ -47,7 +47,7 @@ Click on ![Open Font Directory](addons/ui_toolbar/assets/icons/folder_open-white
 Make sure the selected directory and filenames are structured as below:
 - {root_dir}
   - {font_dir}
-    - {font_filename}-{weight_name}
+    - {font_filename}{- or _}{weight_name}
 	- ...
   - ...
 
@@ -59,7 +59,10 @@ Example:
 	- Arial-Italic.ttf
 	- Arial-BoldItalic.ttf
   - Courier/
-    - ...
+    - Courier_Regular.ttf
+	- Courier_Bold.ttf
+	- Courier_Italic.ttf
+	- Courier_BoldItalic.ttf
   - ...
 
 > Folder name of the font will be used as the font name in toolbar

@@ -2,20 +2,20 @@ extends Object
 
 const FONT_FILE_PATTERN = "\\.ttf$"
 const FONT_WEIGHT_PATTERNS = {
-	"thin": "(?i)-thin",
-	"extra-light": "(?i)-extralight",
-	"light": "(?i)-light",
-	"regular": "(?i)-regular",
-	"medium": "(?i)-medium",
-	"semi-bold": "(?i)-semibold",
-	"bold": "(?i)-bold",
-	"extra-bold": "(?i)-extrabold",
-	"black": "(?i)-black",
-	"extra-black": "(?i)-extrablack"
+	"thin": "(?i)(-|_)thin",
+	"extra-light": "(?i)(-|_)extralight",
+	"light": "(?i)(-|_)light",
+	"regular": "(?i)(-|_)regular",
+	"medium": "(?i)(-|_)medium",
+	"semi-bold": "(?i)(-|_)semibold",
+	"bold": "(?i)(-|_)bold",
+	"extra-bold": "(?i)(-|_)extrabold",
+	"black": "(?i)(-|_)black",
+	"extra-black": "(?i)(-|_)extrablack"
 }
 const FONT_ITALIC_PATTERN = "(?i)italic"
-const FONT_ITALIC_ONLY_PATTERN = "(?i)-italic"
-const FONT_VARIABLE_PATTERN = "(?i)-variable"
+const FONT_ITALIC_ONLY_PATTERN = "(?i)(-|_)italic"
+const FONT_VARIABLE_PATTERN = "(?i)(-|_)variable"
 var FONT_STYLES = {
 	"Heading 1": FontStyle.new("light", 96, -3),
 	"Heading 2": FontStyle.new("light", 60, -2),
