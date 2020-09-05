@@ -3,11 +3,12 @@ extends Control
 const Utils = preload("../scripts/Utils.gd")
 const FontManager = preload("../scripts/FontManager.gd")
 
-signal property_edited(name)
+signal property_edited(name) # Emitted when property edited, mainly to notify inspector refresh
 
+# Config file to save user preference
 const CONFIG_DIR = "res://addons/ui_toolbar/plugin.cfg" # Must be abosulte path
 const CONFIG_SECTION_META = "meta"
-const CONFIG_KEY_FONTS_DIR = "fonts_dir"
+const CONFIG_KEY_FONTS_DIR = "fonts_dir" # Directory to fonts resource
 # Generic font properties
 const PROPERTY_FONT_COLOR = "custom_colors/font_color"
 const PROPERTY_FONT = "custom_fonts/font"
@@ -23,18 +24,19 @@ const PROPERTY_ALIGN = "align"
 
 const DEFAULT_FONT_SIZE = 16
 
-var focused_object setget set_focused_object
-var focused_property setget set_focused_property
-var focused_inspector setget set_focused_inspector
-var selected_font_root_dir = "res://"
+# Reference passed down from EditorPlugin
+var focused_object setget set_focused_object # Editor editing object
+var focused_property setget set_focused_property # Editor editing property
+var focused_inspector setget set_focused_inspector # Editor editing inspector
 var undo_redo
 
-var font_manager = FontManager.new()
-var config = ConfigFile.new()
+var selected_font_root_dir = "res://"
+var font_manager = FontManager.new() # Manager of loaded fonts from fonts_dir
+var config = ConfigFile.new() # Config file of user preference
 
-var _object_orig_font_color = Color.white # Font color of object when color picker button pressed
-var _object_orig_highlight
-var _object_orig_font_style
+var _object_orig_font_color = Color.white # Font color of object when FontColor pressed
+var _object_orig_highlight # Highlight(StyleBoxFlat) when Highlight pressed
+var _object_orig_font_style # FontManager.FontStyle object when FontStyle item selected
 
 func _init():
 	var result = config.load(CONFIG_DIR)
@@ -79,6 +81,7 @@ func _ready():
 	if not fonts_dir.empty():
 		_on_FontNameFileDialog_dir_selected(fonts_dir)
 
+# Change font object with undo/redo
 func change_font(object, to):
 	var from = object.get(PROPERTY_FONT)
 	undo_redo.create_action("Change Font")
@@ -86,6 +89,7 @@ func change_font(object, to):
 	undo_redo.add_undo_method(self, "set_font", object, from if from else false)
 	undo_redo.commit_action()
 
+# Change font data of font object with undo/redo
 func change_font_data(object, to):
 	var from = object.get(PROPERTY_FONT).font_data
 	undo_redo.create_action("Change Font Data")
@@ -93,6 +97,7 @@ func change_font_data(object, to):
 	undo_redo.add_undo_method(self, "set_font_data", object, from if from else false)
 	undo_redo.commit_action()
 
+# Change rich text fonts with undo/redo
 func change_rich_text_fonts(object, to):
 	var from = {}
 	from["regular"] = object.get(PROPERTY_FONT_NORMAL)
@@ -104,6 +109,7 @@ func change_rich_text_fonts(object, to):
 	undo_redo.add_undo_method(self, "set_rich_text_fonts", object, from if from else false)
 	undo_redo.commit_action()
 
+# Change font size with undo/redo
 func change_font_size(object, to):
 	var from = object.get(PROPERTY_FONT).size
 	undo_redo.create_action("Change Font Size")
@@ -111,6 +117,7 @@ func change_font_size(object, to):
 	undo_redo.add_undo_method(self, "set_font_size", object, from)
 	undo_redo.commit_action()
 
+# Change font color with undo/redo
 func change_font_color(object, to):
 	var from = _object_orig_font_color
 	undo_redo.create_action("Change Font Color")
@@ -118,6 +125,7 @@ func change_font_color(object, to):
 	undo_redo.add_undo_method(self, "set_font_color", object, from if from else false)
 	undo_redo.commit_action()
 
+# Change highlight(StyleBoxFlat) with undo/redo
 func change_highlight(object, to):
 	var from = _object_orig_highlight
 	undo_redo.create_action("Change Highlight")
@@ -125,6 +133,7 @@ func change_highlight(object, to):
 	undo_redo.add_undo_method(self, "set_highlight", object, from if from else false)
 	undo_redo.commit_action()
 
+# Change align with undo/redo
 func change_align(object, to):
 	var from = object.get(PROPERTY_ALIGN)
 	undo_redo.create_action("Change Align")
@@ -132,6 +141,7 @@ func change_align(object, to):
 	undo_redo.add_undo_method(self, "set_align", object, from)
 	undo_redo.commit_action()	
 
+# Change font style(FontManager.FontStyle) with undo/redo
 func change_font_style(object, to):
 	var from = _object_orig_font_style
 	undo_redo.create_action("Change Font Style")
@@ -139,6 +149,7 @@ func change_font_style(object, to):
 	undo_redo.add_undo_method(self, "set_font_style", object, from if from else false)
 	undo_redo.commit_action()
 
+# Reflect font name of focused_object to toolbar
 func reflect_font_name_control():
 	var dynamic_font = focused_object.get(PROPERTY_FONT) if focused_object else null
 	if dynamic_font:
@@ -155,6 +166,7 @@ func reflect_font_name_control():
 	else:
 		reset_font_name_control()
 
+# Reflect font weight of focused_object to toolbar, always call reflect_font_name_control first
 func reflect_font_weight_control():
 	var dynamic_font = focused_object.get(PROPERTY_FONT) if focused_object else null
 	if dynamic_font:
@@ -166,6 +178,7 @@ func reflect_font_weight_control():
 					return true
 	return false
 
+# Reflect font size of focused_object to toolbar, always call reflect_font_name_control first
 func reflect_font_size_control():
 	var dynamic_font = focused_object.get(PROPERTY_FONT) if focused_object else null
 	$FontSize.text = str(dynamic_font.size) if dynamic_font else str(DEFAULT_FONT_SIZE)
@@ -175,6 +188,7 @@ func reflect_font_size_control():
 	$FontSize.set(PROPERTY_FONT_COLOR, font_size_color)
 	$FontSize/FontSizePreset.disabled = dynamic_font == null
 
+# Reflect bold/italic of focused_object to toolbar, always call reflect_font_name_control first
 func reflect_bold_italic_control():
 	if $FontName.get_item_count():
 		var font_name = $FontName.get_item_text($FontName.selected)
@@ -202,6 +216,7 @@ func reflect_bold_italic_control():
 		$Bold.pressed = false
 		$Italic.pressed = false
 
+# Reflect font color of focused_object to toolbar
 func reflect_font_color_control():
 	var focused_object_font_color = focused_object.get(PROPERTY_FONT_COLOR) if focused_object else null
 	var font_color = Color.white
@@ -210,6 +225,7 @@ func reflect_font_color_control():
 	$FontColor/ColorRect.color = font_color
 	$FontColor/PopupPanel/ColorPicker.color = font_color
 
+# Reflect highlight color of focused_object to toolbar
 func reflect_highlight_control():
 	var focused_object_highlight = focused_object.get(PROPERTY_HIGHLIGHT) if focused_object else null
 	var highlight_color = Color.white # default modulate color
@@ -219,6 +235,7 @@ func reflect_highlight_control():
 	$Highlight/ColorRect.color = highlight_color
 	$Highlight/PopupPanel/ColorPicker.color = highlight_color
 
+# Reflect horizontal align of focused_object to toolbar
 func reflect_align_control():
 	var align = focused_object.get(PROPERTY_ALIGN) if focused_object else null
 	$AlignLeft.pressed = false
@@ -240,16 +257,19 @@ func reflect_align_control():
 		$AlignCenter.disabled = true
 		$AlignRight.disabled = true
 
+# Reflect font style of focused_object to toolbar, it only check if focused_object can applied with style
 func reflect_font_style_control():
 	# Font Style is not required to be accurate
 	var dynamic_font = focused_object.get(PROPERTY_FONT) if focused_object else null
 	$FontStyle.disabled = dynamic_font == null
 
+# Reset font name on toolbar
 func reset_font_name_control():
 	if $FontName.get_item_count():
 		$FontName.selected = $FontName.get_item_count() - 1
 	$FontWeight.clear()
 
+# Reset font weight on toolbar
 func reset_font_weight_control():
 	if focused_object is RichTextLabel:
 		$FontWeight.disabled = true
@@ -526,6 +546,7 @@ func _on_RectSizeRefresh_pressed():
 	if focused_object:
 		focused_object.set("rect_size", Vector2.ZERO)
 
+# focused_object changed when user select different object in editor
 func _on_focused_object_changed(new_focused_object):
 	reflect_font_name_control() # Font family must be reflected first
 	reflect_font_size_control()
@@ -534,7 +555,16 @@ func _on_focused_object_changed(new_focused_object):
 	reflect_bold_italic_control()
 	reflect_align_control()
 	reflect_font_style_control()
+    
+# focused_property changed when user select different property in inspector
+func _on_focused_property_changed(new_property):
+	pass
 
+# focused_inspector changed when user select different inspector in editor
+func _on_focused_inspector_changed(new_inspector):
+	pass
+
+# Called from setter method, handle update of font name/font weight in toolbar
 func _on_font_data_changed(new_font_data):
 	var font_and_weight_name = font_manager.get_font_and_weight_name(new_font_data)
 	var font_resource = font_manager.get_font_resource(font_and_weight_name.font_name)
@@ -544,6 +574,7 @@ func _on_font_data_changed(new_font_data):
 	reflect_bold_italic_control()
 	emit_signal("property_edited", PROPERTY_FONT)
 
+# Called from setter method, handle update of font name/font weight in toolbar
 func _on_font_changed(new_font):
 	var font_name = $FontName.get_item_text($FontName.selected)
 	var font_resource = font_manager.get_font_resource(font_name)
@@ -564,47 +595,49 @@ func _on_font_changed(new_font):
 	reflect_font_style_control()
 	emit_signal("property_edited", PROPERTY_FONT)
 
+# Called from setter method, handle update of font name/font weight in toolbar
 func _on_rich_text_fonts_changed(fonts):
 	# TODO: Reflect font name of rich text font
 	emit_signal("property_edited", PROPERTY_FONT)
 
+# Called from setter method, handle update of font size in toolbar
 func _on_font_size_changed(new_font_size):
 	var new_font_size_str = str(new_font_size)
 	$FontSize.text = new_font_size_str
 
 	emit_signal("property_edited", PROPERTY_FONT)
 
+# Called from setter method, handle update of font color in toolbar
 func _on_font_color_changed(new_font_color):
 	$FontColor/ColorRect.color = new_font_color if new_font_color else Color.white
 
 	emit_signal("property_edited", PROPERTY_FONT_COLOR)
 
+# Called from setter method, handle update of highlight in toolbar
 func _on_highlight_changed(new_highlight):
 	reflect_highlight_control()
 
 	emit_signal("property_edited", PROPERTY_HIGHLIGHT)
 
+# Called from setter method, handle update of align in toolbar
 func _on_align_changed(align):
 	reflect_align_control()
 
 	emit_signal("property_edited", PROPERTY_ALIGN)
 
-func _on_focused_property_changed(new_property):
-	pass
-
-func _on_focused_inspector_changed(new_inspector):
-	pass
-
+# font data setter, toolbar gets updated after called
 func set_font_data(object, font_data):
 	font_data = font_data if font_data else null # font might be bool false, as Godot ignore null for varargs
 	object.get(PROPERTY_FONT).font_data = font_data
 	_on_font_data_changed(font_data)
 
+# font setter, toolbar gets updated after called
 func set_font(object, font):
 	font = font if font else null 
 	object.set(PROPERTY_FONT, font) 
 	_on_font_changed(font)
 
+# rich text fonts setter, toolbar gets updated after called
 func set_rich_text_fonts(object, fonts):
 	object.set(PROPERTY_FONT_NORMAL, fonts.regular)
 	object.set(PROPERTY_FONT_BOLD, fonts.bold)
@@ -612,10 +645,12 @@ func set_rich_text_fonts(object, fonts):
 	object.set(PROPERTY_FONT_BOLD_ITALIC, fonts.bold_italic)
 	_on_rich_text_fonts_changed(fonts)
 
+# font size setter, toolbar gets updated after called
 func set_font_size(object, font_size):
 	object.get(PROPERTY_FONT).size = font_size
 	_on_font_size_changed(font_size)
 
+# font color setter, toolbar gets updated after called
 func set_font_color(object, font_color):
 	font_color = font_color if font_color else null
 	if object is RichTextLabel:
@@ -624,15 +659,18 @@ func set_font_color(object, font_color):
 		object.set(PROPERTY_FONT_COLOR, font_color)
 	_on_font_color_changed(font_color)
 
+# highlight setter, toolbar gets updated after called
 func set_highlight(object, highlight):
 	highlight = highlight if highlight else null
 	object.set(PROPERTY_HIGHLIGHT, highlight)
 	_on_highlight_changed(highlight)
 
+# align setter, toolbar gets updated after called
 func set_align(object, align):
 	object.set(PROPERTY_ALIGN, align)
 	_on_align_changed(align)
 
+# font style setter, toolbar gets updated after called
 func set_font_style(object, font_style):
 	if not font_style:
 		return
@@ -645,25 +683,30 @@ func set_font_style(object, font_style):
 	set_font_size(object, font_style.size)
 	set_font_extra_spacing_char(object, font_style.letter_spacing)
 
+# font letter spacing setter, toolbar gets updated after called
 func set_font_extra_spacing_char(object, new_spacing):
 	object.get(PROPERTY_FONT).extra_spacing_char = new_spacing
 	# TODO: Add gui for font extra spacing
 
+# focused_object setter, mainly called from EditorPlugin
 func set_focused_object(obj):
 	if focused_object != obj:
 		focused_object = obj
 		_on_focused_object_changed(focused_object)
 
+# focused_property setter, mainly called from EditorPlugin
 func set_focused_property(prop):
 	if focused_property != prop:
 		focused_property = prop
 		_on_focused_property_changed(focused_property)
 
+# focused_inspector setter, mainly called from EditorPlugin
 func set_focused_inspector(insp):
 	if focused_inspector != insp:
 		focused_inspector = insp
 		_on_focused_inspector_changed(focused_inspector)
 
+# Convenience method to create font object with some default settings
 func create_new_font_obj(font_data, size=null):
 	var font  = DynamicFont.new()
 	font.use_filter = true
@@ -672,14 +715,16 @@ func create_new_font_obj(font_data, size=null):
 		font.size = size
 	return font
 
-func can_bold_active(font_data):
+# Check if focused_object can be bold-ed
+func can_bold_active(font_resource):
 	if $Italic.pressed:
-		$Bold.disabled = not font_data.weights.bold_italic
+		$Bold.disabled = not font_resource.weights.bold_italic
 	else:
-		$Bold.disabled = not font_data.weights.bold
+		$Bold.disabled = not font_resource.weights.bold
 
-func can_italic_active(font_data):
+# Check if focused_object can be italic-ed
+func can_italic_active(font_resource):
 	if $Bold.pressed:
-		$Italic.disabled = not font_data.weights.bold_italic
+		$Italic.disabled = not font_resource.weights.bold_italic
 	else:
-		$Italic.disabled = not font_data.weights.bold
+		$Italic.disabled = not font_resource.weights.bold

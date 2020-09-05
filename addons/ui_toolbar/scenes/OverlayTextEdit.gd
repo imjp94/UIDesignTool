@@ -27,6 +27,7 @@ func _on_focused_exited():
 	# TODO: More efficient way to handle undo/redo of text, right now, whole chunks of string is cached everytime
 	change_text(focused_object, text)
 
+# Popup at mouse position
 func popup():
 	if not focused_object:
 		return
@@ -41,6 +42,7 @@ func popup():
 
 	_object_orig_text = focused_object.text
 
+# Change text with undo/redo
 func change_text(object, to):
 	var from = _object_orig_text
 	undo_redo.create_action("Change Text")

@@ -30,7 +30,7 @@ var FONT_STYLES = {
 	"Button": FontStyle.new("medium", 14, 1),
 	"Caption": FontStyle.new("regular", 12, 1),
 	"Overline": FontStyle.new("regular", 10)
-}
+} # Typography hierarchy presets, see https://material.io/design/typography/the-type-system.html#type-scale
 const DIR_FOLDER_PATTERN = "\\w+(?!.*\\w)"
 
 var font_resources = []
@@ -74,6 +74,7 @@ func _init():
 	if _dir_folder_regex.compile(DIR_FOLDER_PATTERN):
 		print("Failed to compile ", DIR_FOLDER_PATTERN)
 
+# Load root dir of font resources, check Readme for directory structure
 func load_root_dir(root_dir):
 	var directory = Directory.new()
 	var result = directory.open(root_dir)
@@ -95,6 +96,7 @@ func load_root_dir(root_dir):
 
 	return true
 
+# Load fonts data from directory, check Readme for filename pattern
 func load_fonts(dir):
 	var directory = Directory.new()
 	var result = directory.open(dir)
@@ -139,6 +141,7 @@ func load_fonts(dir):
 
 	return true
 
+# Find font and weight name of given font data, return null if not found
 func get_font_and_weight_name(font_data):
 	for res in font_resources:
 		for property in inst2dict(res.weights).keys():
@@ -151,6 +154,7 @@ func get_font_and_weight_name(font_data):
 					return {"font_name": res.name, "weight_name": property}
 	return null 
 
+# Find font resource with font name
 func get_font_resource(font_name):
 	var font_resource
 	for res in font_resources:
@@ -158,6 +162,7 @@ func get_font_resource(font_name):
 			return res
 	return null
 
+# Declaration of font type with weights
 class FontResource:
 	var name = ""
 	var weights = FontWeights.new()
@@ -165,6 +170,7 @@ class FontResource:
 	func _init(n):
 		name = n
 
+# Font datas that has been assigned to its common weight name
 class FontWeights:
 	# Weight names, see (https://docs.microsoft.com/en-us/typography/opentype/spec/os2#usweightclass)
 	var thin
@@ -189,6 +195,7 @@ class FontWeights:
 	var black_italic
 	var extra_black_italic
 
+    # Check if there is any font weight
 	func empty():
 		for property in inst2dict(self).keys():
 			if property == "@subpath" or property == "@path":
@@ -198,7 +205,7 @@ class FontWeights:
 				return false
 		return true
 
-# TODO: Custom resource to define font style
+# Declaration of font style TODO: Custom resource to define font style
 class FontStyle:
 	var weight = "regular"
 	var size = 16
