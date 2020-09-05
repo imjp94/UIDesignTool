@@ -1,6 +1,6 @@
-# UI Toolbar
+# UI Design Tool
 
-Intuitive UI design workflow in Godot with word editor toolbar.
+Intuitive UI design workflow in Godot.
 
 Import/manage font source files and styling UI directly in the editor viewport.
 
@@ -27,7 +27,7 @@ Import/manage font source files and styling UI directly in the editor viewport.
 or
 
 - Download this respository,
-  1. Move `addons/ui_toolbar` to your `{project_dir}`
+  1. Move `addons/ui_design_tool` to your `{project_dir}`
   2. Enable it from Project -> Settings -> Plugins
 
 ## Usage
@@ -42,7 +42,7 @@ Double click on `Control` node with `text` property(`Label`, `Button`, `RichText
 
 ### Import TrueType Font(.ttf)
 
-Click on ![Open Font Directory](addons/ui_toolbar/assets/icons/folder_open-white-18dp.svg "Open Font Directory Icon") to select the root directory where your font source directories located.
+Click on ![Open Font Directory](addons/ui_design_tool/assets/icons/folder_open-white-18dp.svg "Open Font Directory Icon") to select the root directory where your font source directories located.
 
 Make sure the selected directory and filenames are structured as below:
 - {root_dir}
@@ -67,7 +67,7 @@ Example:
 
 > Folder name of the font will be used as the font name in toolbar
 
-Click on ![Refresh Font Directory](addons/ui_toolbar/assets/icons/refresh-white-18dp.svg "Refresh Font Directory Icon") to refresh the font list upon any changes made to the font sources.
+Click on ![Refresh Font Directory](addons/ui_design_tool/assets/icons/refresh-white-18dp.svg "Refresh Font Directory Icon") to refresh the font list upon any changes made to the font sources.
 
 Supported weight names (non case sensitive)
 

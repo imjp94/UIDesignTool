@@ -1,23 +1,22 @@
 [gd_scene load_steps=15 format=2]
 
-[ext_resource path="res://addons/ui_toolbar/assets/icons/format_bold-white-18dp.svg" type="Texture" id=1]
-[ext_resource path="res://addons/ui_toolbar/assets/icons/format_italic-white-18dp.svg" type="Texture" id=2]
-[ext_resource path="res://addons/ui_toolbar/assets/icons/format_underlined-white-18dp.svg" type="Texture" id=3]
-[ext_resource path="res://addons/ui_toolbar/assets/icons/format-color-text.png" type="Texture" id=4]
-[ext_resource path="res://addons/ui_toolbar/scenes/UIToolbar.gd" type="Script" id=5]
-[ext_resource path="res://addons/ui_toolbar/assets/icons/folder_open-white-18dp.svg" type="Texture" id=6]
-[ext_resource path="res://addons/ui_toolbar/assets/icons/refresh-white-18dp.svg" type="Texture" id=7]
-[ext_resource path="res://addons/ui_toolbar/assets/icons/marker.png" type="Texture" id=8]
-[ext_resource path="res://addons/ui_toolbar/assets/icons/format_clear-white-18dp.svg" type="Texture" id=9]
-[ext_resource path="res://addons/ui_toolbar/assets/icons/format_color_reset-white-18dp.svg" type="Texture" id=10]
-[ext_resource path="res://addons/ui_toolbar/assets/icons/photo_size_select_small-white-18dp.svg" type="Texture" id=11]
-[ext_resource path="res://addons/ui_toolbar/assets/icons/format_align_center-white-18dp.svg" type="Texture" id=12]
-[ext_resource path="res://addons/ui_toolbar/assets/icons/format_align_left-white-18dp.svg" type="Texture" id=13]
-[ext_resource path="res://addons/ui_toolbar/assets/icons/format_align_right-white-18dp.svg" type="Texture" id=14]
+[ext_resource path="res://addons/ui_design_tool/scenes/Toolbar.gd" type="Script" id=1]
+[ext_resource path="res://addons/ui_design_tool/assets/icons/format_bold-white-18dp.svg" type="Texture" id=2]
+[ext_resource path="res://addons/ui_design_tool/assets/icons/format_italic-white-18dp.svg" type="Texture" id=3]
+[ext_resource path="res://addons/ui_design_tool/assets/icons/format_underlined-white-18dp.svg" type="Texture" id=4]
+[ext_resource path="res://addons/ui_design_tool/assets/icons/format-color-text.png" type="Texture" id=5]
+[ext_resource path="res://addons/ui_design_tool/assets/icons/format_color_reset-white-18dp.svg" type="Texture" id=6]
+[ext_resource path="res://addons/ui_design_tool/assets/icons/photo_size_select_small-white-18dp.svg" type="Texture" id=7]
+[ext_resource path="res://addons/ui_design_tool/assets/icons/folder_open-white-18dp.svg" type="Texture" id=8]
+[ext_resource path="res://addons/ui_design_tool/assets/icons/refresh-white-18dp.svg" type="Texture" id=9]
+[ext_resource path="res://addons/ui_design_tool/assets/icons/marker.png" type="Texture" id=10]
+[ext_resource path="res://addons/ui_design_tool/assets/icons/format_clear-white-18dp.svg" type="Texture" id=11]
+[ext_resource path="res://addons/ui_design_tool/assets/icons/format_align_right-white-18dp.svg" type="Texture" id=12]
+[ext_resource path="res://addons/ui_design_tool/assets/icons/format_align_center-white-18dp.svg" type="Texture" id=13]
+[ext_resource path="res://addons/ui_design_tool/assets/icons/format_align_left-white-18dp.svg" type="Texture" id=14]
 
-
-[node name="UIToolbar" type="HBoxContainer"]
-script = ExtResource( 5 )
+[node name="Toolbar" type="HBoxContainer"]
+script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -42,7 +41,7 @@ margin_left = 66.0
 margin_right = 96.0
 margin_bottom = 24.0
 hint_tooltip = "Open Font Family"
-icon = ExtResource( 6 )
+icon = ExtResource( 8 )
 flat = true
 __meta__ = {
 "_edit_use_anchors_": false,
@@ -58,15 +57,15 @@ window_title = "Open a Directory"
 resizable = true
 mode = 2
 access = 2
-current_dir = "/Documents/Godot/projects/Typography"
-current_path = "/Documents/Godot/projects/Typography/"
+current_dir = "/Documents/Godot/projects/UIDesignTool"
+current_path = "/Documents/Godot/projects/UIDesignTool/"
 
 [node name="FontNameRefresh" type="Button" parent="."]
 margin_left = 100.0
 margin_right = 130.0
 margin_bottom = 24.0
 hint_tooltip = "Refresh Font Family"
-icon = ExtResource( 7 )
+icon = ExtResource( 9 )
 flat = true
 __meta__ = {
 "_editor_description_": ""
@@ -118,7 +117,7 @@ margin_bottom = 24.0
 hint_tooltip = "Bold"
 disabled = true
 toggle_mode = true
-icon = ExtResource( 1 )
+icon = ExtResource( 2 )
 flat = true
 __meta__ = {
 "_editor_description_": ""
@@ -131,7 +130,7 @@ margin_bottom = 24.0
 hint_tooltip = "Italic"
 disabled = true
 toggle_mode = true
-icon = ExtResource( 2 )
+icon = ExtResource( 3 )
 flat = true
 __meta__ = {
 "_editor_description_": ""
@@ -145,7 +144,7 @@ hint_tooltip = "Underline
 *Only supported in RichTextLabel"
 disabled = true
 toggle_mode = true
-icon = ExtResource( 3 )
+icon = ExtResource( 4 )
 flat = true
 __meta__ = {
 "_editor_description_": ""
@@ -156,7 +155,7 @@ margin_left = 324.0
 margin_right = 354.0
 margin_bottom = 24.0
 hint_tooltip = "Font Color"
-icon = ExtResource( 4 )
+icon = ExtResource( 5 )
 flat = true
 __meta__ = {
 "_editor_description_": ""
@@ -196,7 +195,7 @@ margin_left = 358.0
 margin_right = 388.0
 margin_bottom = 24.0
 hint_tooltip = "Highlight Color"
-icon = ExtResource( 8 )
+icon = ExtResource( 10 )
 flat = true
 __meta__ = {
 "_editor_description_": ""
@@ -242,7 +241,7 @@ margin_right = 430.0
 margin_bottom = 24.0
 hint_tooltip = "Align left"
 toggle_mode = true
-icon = ExtResource( 13 )
+icon = ExtResource( 14 )
 flat = true
 __meta__ = {
 "_editor_description_": ""
@@ -254,7 +253,7 @@ margin_right = 464.0
 margin_bottom = 24.0
 hint_tooltip = "Align center"
 toggle_mode = true
-icon = ExtResource( 12 )
+icon = ExtResource( 13 )
 flat = true
 __meta__ = {
 "_editor_description_": ""
@@ -266,7 +265,7 @@ margin_right = 498.0
 margin_bottom = 24.0
 hint_tooltip = "Align right"
 toggle_mode = true
-icon = ExtResource( 14 )
+icon = ExtResource( 12 )
 flat = true
 __meta__ = {
 "_editor_description_": ""
@@ -294,7 +293,7 @@ margin_left = 607.0
 margin_right = 637.0
 margin_bottom = 24.0
 hint_tooltip = "Clear Font Formatting"
-icon = ExtResource( 9 )
+icon = ExtResource( 11 )
 flat = true
 __meta__ = {
 "_editor_description_": ""
@@ -305,7 +304,7 @@ margin_left = 641.0
 margin_right = 671.0
 margin_bottom = 24.0
 hint_tooltip = "Clear Color"
-icon = ExtResource( 10 )
+icon = ExtResource( 6 )
 flat = true
 __meta__ = {
 "_editor_description_": ""
@@ -317,7 +316,7 @@ margin_right = 705.0
 margin_bottom = 24.0
 hint_tooltip = "Refresh Rect Size
 *Force control to recalculate its own rect_size"
-icon = ExtResource( 11 )
+icon = ExtResource( 7 )
 flat = true
 __meta__ = {
 "_editor_description_": ""

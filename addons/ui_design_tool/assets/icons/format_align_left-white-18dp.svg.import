@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/marker.png-e75fda9b8087d2e7ba785fda1085b509.stex"
+path="res://.import/format_align_left-white-18dp.svg-f4e62d6e31b71bc8605b920932857161.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/ui_toolbar/assets/icons/marker.png"
-dest_files=[ "res://.import/marker.png-e75fda9b8087d2e7ba785fda1085b509.stex" ]
+source_file="res://addons/ui_design_tool/assets/icons/format_align_left-white-18dp.svg"
+dest_files=[ "res://.import/format_align_left-white-18dp.svg-f4e62d6e31b71bc8605b920932857161.stex" ]
 
 [params]
 

@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/format_color_reset-white-18dp.svg-647b9ef0647c8c52f2c657485ef09985.stex"
+path="res://.import/format_align_center-white-18dp.svg-223e2eb74ca8e39f9d4bf989291c7829.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/ui_toolbar/assets/icons/format_color_reset-white-18dp.svg"
-dest_files=[ "res://.import/format_color_reset-white-18dp.svg-647b9ef0647c8c52f2c657485ef09985.stex" ]
+source_file="res://addons/ui_design_tool/assets/icons/format_align_center-white-18dp.svg"
+dest_files=[ "res://.import/format_align_center-white-18dp.svg-223e2eb74ca8e39f9d4bf989291c7829.stex" ]
 
 [params]
 

@@ -15,12 +15,12 @@ _global_script_class_icons={
 
 [application]
 
-config/name="UI Toolbar"
+config/name="UI Design Tool"
 config/icon="res://icon.png"
 
 [editor_plugins]
 
-enabled=PoolStringArray( "godot-plugin-refresher", "ui_toolbar", "zylann.editor_debugger" )
+enabled=PoolStringArray( "ui_design_tool" )
 
 [rendering]
 

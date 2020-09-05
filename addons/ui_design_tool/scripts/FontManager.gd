@@ -91,7 +91,7 @@ func load_root_dir(root_dir):
 			dir = directory.get_next()
 		directory.list_dir_end()
 	else:
-		push_warning("UIToolbar: An error occurred when trying to access %s, ERROR: %d" % [root_dir, result])
+		push_warning("UI Design Tool: An error occurred when trying to access %s, ERROR: %d" % [root_dir, result])
 		return false
 
 	return true
@@ -134,9 +134,9 @@ func load_fonts(dir):
 		if not font_resource.weights.empty():
 			font_resources.append(font_resource)
 		else:
-			push_warning("UIToolbar: Unable to locate usable .ttf files from %s, check README.md for proper directory/filename structure" % dir)
+			push_warning("UI Design Tool: Unable to locate usable .ttf files from %s, check README.md for proper directory/filename structure" % dir)
 	else:
-		push_warning("UIToolbar: An error occurred when trying to access %s, ERROR: %d" % [dir, result])
+		push_warning("UI Design Tool: An error occurred when trying to access %s, ERROR: %d" % [dir, result])
 		return false
 
 	return true
