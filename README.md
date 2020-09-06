@@ -1,5 +1,7 @@
 # UI Design Tool
 
+![Toolbar](ui_design_tool_preview.gif "Toolbar")
+
 Intuitive UI design workflow in Godot.
 
 Import/manage font source files and styling UI directly in the editor viewport.
@@ -34,9 +36,13 @@ or
 
 ### Toolbar
 
+![Show Overlay Text Editor](toolbar_preview.png "Show Overlay Text Editor")
+
 Select any `Control` node will show the toolbar at the bottom of 2D screen viewport, otherwise, it will stay hidden.
 
 ### Overlay Text Editor
+
+![Show Overlay Text Editor](overlay_text_editor_preview.gif "Show Overlay Text Editor")
 
 Double click on `Control` node with `text` property(`Label`, `Button`, `RichTextLabel`, etc...) will show overlay text editor at mouse position.
 
@@ -82,7 +88,7 @@ Supported weight names (non case sensitive)
 - black
 - extrablack
 
-Italic:
+Supported italic weight names (non case sensitive):
 
 - thinitalic
 - extralightitalic
