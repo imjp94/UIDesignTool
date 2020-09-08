@@ -609,7 +609,7 @@ func _on_font_size_changed(new_font_size):
 
 # Called from setter method, handle update of font color in toolbar
 func _on_font_color_changed(new_font_color):
-	$FontColor/ColorRect.color = new_font_color if new_font_color else Color.white
+	reflect_font_color_control()
 
 	emit_signal("property_edited", PROPERTY_FONT_COLOR)
 
@@ -652,7 +652,7 @@ func set_font_size(object, font_size):
 
 # font color setter, toolbar gets updated after called
 func set_font_color(object, font_color):
-	font_color = font_color if font_color else null
+	font_color = font_color if font_color != null else null
 	if object is RichTextLabel:
 		object.set(PROPERTY_FONT_COLOR_DEFAULT, font_color)
 	else:
