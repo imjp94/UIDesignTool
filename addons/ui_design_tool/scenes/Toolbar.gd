@@ -6,7 +6,7 @@ const FontManager = preload("../scripts/FontManager.gd")
 signal property_edited(name) # Emitted when property edited, mainly to notify inspector refresh
 
 # Config file to save user preference
-const CONFIG_DIR = "res://addons/ui_design_tool/plugin.cfg" # Must be abosulte path
+const CONFIG_DIR = "res://addons/ui_design_tool/user_pref.cfg" # Must be abosulte path
 const CONFIG_SECTION_META = "meta"
 const CONFIG_KEY_FONTS_DIR = "fonts_dir" # Directory to fonts resource
 # Generic font properties
@@ -40,8 +40,12 @@ var _object_orig_font_style # FontManager.FontStyle object when FontStyle item s
 
 func _init():
 	var result = config.load(CONFIG_DIR)
-	if config.load(CONFIG_DIR):
-		push_warning("UI Design Tool: An error occurred when trying to access %s, ERROR: %d" % [CONFIG_DIR, result])
+	if result:
+		match result:
+			ERR_FILE_NOT_FOUND:
+				pass
+			_:
+				push_warning("UI Design Tool: An error occurred when trying to access %s, ERROR: %d" % [CONFIG_DIR, result])
 
 func _ready():
 	# FontName
