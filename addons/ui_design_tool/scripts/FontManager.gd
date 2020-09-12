@@ -149,8 +149,8 @@ func get_font_and_weight_name(font_data):
 				continue
 		
 			var weight = res.weights.get(property)
-			if weight:
-				if weight == font_data:
+			if weight and font_data:
+				if weight.resource_path == font_data.resource_path:
 					return {"font_name": res.name, "weight_name": property}
 	return null 
 

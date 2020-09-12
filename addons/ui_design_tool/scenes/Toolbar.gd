@@ -155,16 +155,15 @@ func reflect_font_name_control():
 	if dynamic_font:
 		if dynamic_font.font_data:
 			var font_and_weight_name = font_manager.get_font_and_weight_name(dynamic_font.font_data)
-			for i in $FontName.get_item_count():
-				if $FontName.get_item_text(i) == font_and_weight_name.font_name:
-					$FontName.selected = i
-					reset_font_weight_control()
-					reflect_font_weight_control()
-					break
-		else:
-			reset_font_name_control()
-	else:
-		reset_font_name_control()
+			if font_and_weight_name:
+				for i in $FontName.get_item_count():
+					if $FontName.get_item_text(i) == font_and_weight_name.font_name:
+						$FontName.selected = i
+						reset_font_weight_control()
+						reflect_font_weight_control()
+						return
+	
+	reset_font_name_control()
 
 # Reflect font weight of focused_object to toolbar, always call reflect_font_name_control first
 func reflect_font_weight_control():
