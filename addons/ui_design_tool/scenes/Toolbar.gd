@@ -20,6 +20,7 @@ const PROPERTY_FONT_BOLD_ITALIC = "custom_fonts/bold_italics_font"
 const PROPERTY_FONT_COLOR_DEFAULT = "custom_colors/default_color"
 # Others generic properties
 const PROPERTY_HIGHLIGHT = "custom_styles/normal"
+const PROPERTY_HIGHLIGHT_PANEL = "custom_styles/panel"
 const PROPERTY_ALIGN = "align"
 
 const DEFAULT_FONT_SIZE = 16
@@ -231,6 +232,9 @@ func reflect_font_color_control():
 # Reflect highlight color of focused_object to toolbar
 func reflect_highlight_control():
 	var focused_object_highlight = focused_object.get(PROPERTY_HIGHLIGHT) if focused_object else null
+	if focused_object is Panel or focused_object is PanelContainer:
+		focused_object_highlight = focused_object.get(PROPERTY_HIGHLIGHT_PANEL) if focused_object else null
+
 	var highlight_color = Color.white # default modulate color
 	if focused_object_highlight != null:
 		if focused_object_highlight is StyleBoxFlat:
@@ -462,9 +466,10 @@ func _on_FontColor_PopupPanel_popup_hide():
 
 func _on_Highlight_pressed():
 	$Highlight/PopupPanel.popup()
-
 	if focused_object:
 		var style_box_flat = focused_object.get(PROPERTY_HIGHLIGHT)
+		if focused_object is Panel or focused_object is PanelContainer:
+			style_box_flat = focused_object.get(PROPERTY_HIGHLIGHT_PANEL)
 		if style_box_flat:
 			_object_orig_highlight = StyleBoxFlat.new()
 			_object_orig_highlight.bg_color = style_box_flat.bg_color
@@ -480,7 +485,10 @@ func _on_Highlight_ColorPicker_color_changed(color):
 	var style_box_flat = StyleBoxFlat.new()
 
 	style_box_flat.bg_color = $Highlight/PopupPanel/ColorPicker.color
-	focused_object.set(PROPERTY_HIGHLIGHT, style_box_flat)
+	if focused_object is Panel or focused_object is PanelContainer:
+		focused_object.set(PROPERTY_HIGHLIGHT_PANEL, style_box_flat)
+	else:
+		focused_object.set(PROPERTY_HIGHLIGHT, style_box_flat)
 
 func _on_Highlight_PopupPanel_popup_hide():
 	if not focused_object:
@@ -541,7 +549,11 @@ func _on_ColorClear_pressed():
 		_object_orig_font_color = focused_object.get(PROPERTY_FONT_COLOR_DEFAULT) 
 	else:
 		_object_orig_font_color = focused_object.get(PROPERTY_FONT_COLOR) 
-	_object_orig_highlight = focused_object.get(PROPERTY_HIGHLIGHT)
+
+	if focused_object is Panel or focused_object is PanelContainer:
+		_object_orig_highlight = focused_object.get(PROPERTY_HIGHLIGHT_PANEL)
+	else:
+		_object_orig_highlight = focused_object.get(PROPERTY_HIGHLIGHT)
 	change_font_color(focused_object, null)
 	change_highlight(focused_object, null)
 
@@ -550,7 +562,7 @@ func _on_RectSizeRefresh_pressed():
 		focused_object.set("rect_size", Vector2.ZERO)
 
 # focused_object changed when user select different object in editor
-func _on_focused_object_changed(new_focused_object):
+func _on_focused_object_changed(new_focused_object):	
 	reflect_font_name_control() # Font family must be reflected first
 	reflect_font_size_control()
 	reflect_font_color_control()
@@ -620,7 +632,10 @@ func _on_font_color_changed(new_font_color):
 func _on_highlight_changed(new_highlight):
 	reflect_highlight_control()
 
-	emit_signal("property_edited", PROPERTY_HIGHLIGHT)
+	if focused_object is Panel or focused_object is PanelContainer:
+		emit_signal("property_edited", PROPERTY_HIGHLIGHT_PANEL)
+	else:
+		emit_signal("property_edited", PROPERTY_HIGHLIGHT)
 
 # Called from setter method, handle update of align in toolbar
 func _on_align_changed(align):
@@ -665,7 +680,10 @@ func set_font_color(object, font_color):
 # highlight setter, toolbar gets updated after called
 func set_highlight(object, highlight):
 	highlight = highlight if highlight else null
-	object.set(PROPERTY_HIGHLIGHT, highlight)
+	if object is Panel or object is PanelContainer:
+		object.set(PROPERTY_HIGHLIGHT_PANEL, highlight)
+	else:
+		object.set(PROPERTY_HIGHLIGHT, highlight)
 	_on_highlight_changed(highlight)
 
 # align setter, toolbar gets updated after called
