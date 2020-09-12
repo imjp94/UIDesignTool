@@ -494,9 +494,17 @@ func _on_Highlight_PopupPanel_popup_hide():
 	if not focused_object:
 		return
 
+	var current_highlight
+	if focused_object is Panel or focused_object is PanelContainer:
+		current_highlight = focused_object.get(PROPERTY_HIGHLIGHT_PANEL)
+	else:
+		current_highlight = focused_object.get(PROPERTY_HIGHLIGHT)
+
 	# Color selected
-	var style_box_flat = StyleBoxFlat.new()
-	style_box_flat.bg_color = $Highlight/PopupPanel/ColorPicker.color
+	var style_box_flat
+	if current_highlight or _object_orig_highlight:
+		style_box_flat = StyleBoxFlat.new()
+		style_box_flat.bg_color = $Highlight/PopupPanel/ColorPicker.color
 	change_highlight(focused_object, style_box_flat)
 
 func _on_AlignLeft_pressed():
