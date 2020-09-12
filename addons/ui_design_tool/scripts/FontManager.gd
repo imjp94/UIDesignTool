@@ -16,24 +16,24 @@ const FONT_WEIGHT_PATTERNS = {
 const FONT_ITALIC_PATTERN = "(?i)italic"
 const FONT_ITALIC_ONLY_PATTERN = "(?i)(-|_)italic"
 const FONT_VARIABLE_PATTERN = "(?i)(-|_)variable"
-var FONT_STYLES = {
-	"Heading 1": FontStyle.new("light", 96, -3),
-	"Heading 2": FontStyle.new("light", 60, -2),
-	"Heading 3": FontStyle.new("regular", 48),
-	"Heading 4": FontStyle.new("regular", 34, 1),
-	"Heading 5": FontStyle.new("regular", 24),
-	"Heading 6": FontStyle.new("medium", 20, 1),
-	"Subtitle 1": FontStyle.new("regular", 16),
-	"Subtitle 2": FontStyle.new("medium", 14, 1),
-	"Body 1": FontStyle.new("regular", 16, 1),
-	"Body 2": FontStyle.new("regular", 14, 1),
-	"Button": FontStyle.new("medium", 14, 1),
-	"Caption": FontStyle.new("regular", 12, 1),
-	"Overline": FontStyle.new("regular", 10)
+var FONT_FORMATTINGS = {
+	"Heading 1": FontFormatting.new("light", 96, -3),
+	"Heading 2": FontFormatting.new("light", 60, -2),
+	"Heading 3": FontFormatting.new("regular", 48),
+	"Heading 4": FontFormatting.new("regular", 34, 1),
+	"Heading 5": FontFormatting.new("regular", 24),
+	"Heading 6": FontFormatting.new("medium", 20, 1),
+	"Subtitle 1": FontFormatting.new("regular", 16),
+	"Subtitle 2": FontFormatting.new("medium", 14, 1),
+	"Body 1": FontFormatting.new("regular", 16, 1),
+	"Body 2": FontFormatting.new("regular", 14, 1),
+	"Button": FontFormatting.new("medium", 14, 1),
+	"Caption": FontFormatting.new("regular", 12, 1),
+	"Overline": FontFormatting.new("regular", 10)
 } # Typography hierarchy presets, see https://material.io/design/typography/the-type-system.html#type-scale
 const DIR_FOLDER_PATTERN = "\\w+(?!.*\\w)"
 
-var font_resources = {}
+var font_families = {}
 
 var _font_file_regex = RegEx.new()
 var _font_weight_regexes = {
@@ -79,7 +79,7 @@ func load_root_dir(root_dir):
 	var directory = Directory.new()
 	var result = directory.open(root_dir)
 	if result == OK:
-		font_resources.clear()
+		font_families.clear()
 		directory.list_dir_begin(true) # Skip . and .. directory and hidden
 		var dir = directory.get_next()
 		while dir != "":
@@ -101,8 +101,8 @@ func load_fonts(dir):
 	var directory = Directory.new()
 	var result = directory.open(dir)
 	if result == OK:
-		var font_name = _dir_folder_regex.search(dir).get_string()
-		var font_resource = FontResource.new(font_name)
+		var font_family_name = _dir_folder_regex.search(dir).get_string()
+		var font_family = FontFamily.new(font_family_name)
 		directory.list_dir_begin(true) # Skip . and .. directory and hidden
 		var filename = directory.get_next()
 		while filename != "":
@@ -111,28 +111,30 @@ func load_fonts(dir):
 				continue
 
 			if _font_file_regex.search(filename):
-				for font_weight_name in _font_weight_regexes.keys():
+				for font_weight in _font_weight_regexes.keys():
 					if _font_variable_regex.search(filename): # Godot doesn't support variable font
 						continue
 
 					var abs_dir = directory.get_current_dir() + "/" + filename
-					if _font_weight_regexes[font_weight_name].search(filename):
-						var font_weight = load(abs_dir)
+					if _font_weight_regexes[font_weight].search(filename):
+						var font_data = load(abs_dir)
+						
 						if _font_italic_regex.search(filename):
-							font_resource.weights.set(font_weight_name + "_italic", font_weight)
+							font_family.set_font_face(FontFace.new(font_family.name, font_weight, font_data, FONT_STYLE.ITALIC))
 						else:
-							font_resource.weights.set(font_weight_name, font_weight)
+							font_family.set_font_face(FontFace.new(font_family.name, font_weight, font_data))
 						break
 					else: 
 						# Capture regular italic from {font-name}-italic.ttf
 						if _font_italic_only_regex.search(filename):
-							var font_weight = load(abs_dir)
-							font_resource.weights.set("regular_italic", font_weight)
+							var font_data = load(abs_dir)
+							font_family.set_font_face(FontFace.new(font_family.name, "regular", font_data, FONT_STYLE.ITALIC))
+							break
 			filename = directory.get_next()
 		directory.list_dir_end()
 
-		if not font_resource.weights.empty():
-			font_resources[font_resource.name] = font_resource
+		if not font_family.empty():
+			font_families[font_family.name] = font_family
 		else:
 			push_warning("UI Design Tool: Unable to locate usable .ttf files from %s, check README.md for proper directory/filename structure" % dir)
 	else:
@@ -141,73 +143,99 @@ func load_fonts(dir):
 
 	return true
 
-# Find font and weight name of given font data, return null if not found
-func get_font_and_weight_name(font_data):
-	for res in font_resources.values():
-		for property in inst2dict(res.weights).keys():
-			if property == "@subpath" or property == "@path":
-				continue
-		
-			var weight = res.weights.get(property)
-			if weight and font_data:
-				if weight.resource_path == font_data.resource_path:
-					return {"font_name": res.name, "weight_name": property}
+func get_font_face(font_data):
+	for res in font_families.values():
+		for font_weight in FONT_WEIGHT.keys():
+			var font_faces = res.get(font_weight)
+			for font_face in font_faces.values():
+				if font_face.data and font_data:
+					if font_face.data.resource_path == font_data.resource_path:
+						return font_face
 	return null 
 
 # Find font resource with font name
-func get_font_resource(font_name):
-	return font_resources.get(font_name)
+func get_font_family(font_family_name):
+	return font_families.get(font_family_name)
 
-# Declaration of font type with weights
-class FontResource:
+static func get_font_style_str(font_style):
+	return FONT_STYLE.keys()[font_style].to_lower()
+
+# Declaration of font type with font_faces
+class FontFamily:
 	var name = ""
-	var weights = FontWeights.new()
+	var thin = {}
+	var extra_light = {}
+	var light = {}
+	var regular = {}
+	var medium = {}
+	var semi_bold = {}
+	var bold = {}
+	var extra_bold = {}
+	var black = {}
+	var extra_black = {}
 
 	func _init(n):
 		name = n
 
-# Font datas that has been assigned to its common weight name
-class FontWeights:
-	# Weight names, see (https://docs.microsoft.com/en-us/typography/opentype/spec/os2#usweightclass)
-	var thin
-	var extra_light
-	var light
-	var regular
-	var medium
-	var semi_bold
-	var bold
-	var extra_bold
-	var black
-	var extra_black
+	func set_font_face(font_face):
+		var font_faces = get(font_face.font_weight.replace('-', '_'))
+		font_faces[FONT_STYLE.keys()[font_face.font_style].to_lower()] = font_face
 
-	var thin_italic
-	var extra_light_italic
-	var light_italic
-	var regular_italic
-	var medium_italic
-	var semi_bold_italic
-	var bold_italic
-	var extra_bold_italic
-	var black_italic
-	var extra_black_italic
-
-    # Check if there is any font weight
 	func empty():
-		for property in inst2dict(self).keys():
-			if property == "@subpath" or property == "@path":
-				continue
-
-			if get(property):
+		for font_weight in FONT_WEIGHT.keys():
+			var font_faces = get(font_weight)
+			if not font_faces.values().empty():
 				return false
 		return true
 
+	func get_class():
+		return "FontFamily"
+
+# Font face data, see (https://developer.mozilla.org/my/docs/Web/CSS/@font-face)
+class FontFace:
+	var font_family = ""
+	var font_weight = ""
+	var font_style = FONT_STYLE.NORMAL
+	var data
+
+	func _init(ff, fw, d, fs=FONT_STYLE.NORMAL):
+		font_family = ff
+		font_weight = fw
+		font_style = fs
+		data = d
+
+	func get_class():
+		return "FontFace"
+
 # Declaration of font style TODO: Custom resource to define font style
-class FontStyle:
-	var weight = "regular"
+class FontFormatting:
+	var font_weight = "regular"
+	var font_style = FONT_STYLE.NORMAL
 	var size = 16
 	var letter_spacing = 0
 
-	func _init(w, s, ls=0):
-		weight = w
+	func _init(fw, s, ls=0):
+		font_weight = fw
 		size = s
 		letter_spacing = ls
+
+# List of font style, see (https://developer.mozilla.org/my/docs/Web/CSS/font-style)
+enum FONT_STYLE {
+	NORMAL,
+	ITALIC,
+	OBLIQUE
+}
+
+# List of font weights, see (https://docs.microsoft.com/en-us/typography/opentype/spec/os2#usweightclass)
+const FONT_WEIGHT = {
+	"thin": 100,
+	"extra_light": 200,
+	"light": 300,
+	"regular": 400,
+	"medium": 500,
+	"semi_bold": 600,
+	"bold": 700,
+	"extra_bold": 800,
+	"black": 900,
+	"extra_black": 1000
+}

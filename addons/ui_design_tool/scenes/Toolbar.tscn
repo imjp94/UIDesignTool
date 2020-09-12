@@ -21,7 +21,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="FontName" type="OptionButton" parent="."]
+[node name="FontFamily" type="OptionButton" parent="."]
 margin_top = 2.0
 margin_right = 29.0
 margin_bottom = 22.0
@@ -36,9 +36,7 @@ margin_bottom = 22.0
 hint_tooltip = "Font Weight"
 size_flags_vertical = 4
 
-[node name="FontNameLoadButton" type="Button" parent="."]
-margin_left = 66.0
-margin_right = 96.0
+[node name="FontFamilyLoadButton" type="Button" parent="."]
 margin_bottom = 24.0
 hint_tooltip = "Open Font Family"
 icon = ExtResource( 8 )
@@ -48,7 +46,7 @@ __meta__ = {
 "_editor_description_": ""
 }
 
-[node name="FontNameFileDialog" type="FileDialog" parent="FontNameLoadButton"]
+[node name="FontFamilyFileDialog" type="FileDialog" parent="FontFamilyLoadButton"]
 margin_left = -79.0
 margin_right = 236.0
 margin_bottom = 130.0
@@ -60,9 +58,7 @@ access = 2
 current_dir = "/Documents/Godot/projects/UIDesignTool"
 current_path = "/Documents/Godot/projects/UIDesignTool/"
 
-[node name="FontNameRefresh" type="Button" parent="."]
-margin_left = 100.0
-margin_right = 130.0
+[node name="FontFamilyRefresh" type="Button" parent="."]
 margin_bottom = 24.0
 hint_tooltip = "Refresh Font Family"
 icon = ExtResource( 9 )
@@ -276,8 +272,7 @@ margin_left = 502.0
 margin_right = 506.0
 margin_bottom = 24.0
 
-[node name="FontStyle" type="OptionButton" parent="."]
-margin_left = 510.0
+[node name="FontFormatting" type="OptionButton" parent="."]
 margin_top = 2.0
 margin_right = 603.0
 margin_bottom = 22.0
