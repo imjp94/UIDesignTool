@@ -349,7 +349,7 @@ func _on_FontNameFileDialog_dir_selected(dir):
 	# Load fonts
 	if font_manager.load_root_dir(dir):
 		$FontName.clear()
-		for font_data in font_manager.font_resources:
+		for font_data in font_manager.font_resources.values():
 			$FontName.add_item(font_data.name)
 		$FontName.add_item("None")
 

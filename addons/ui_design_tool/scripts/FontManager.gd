@@ -33,7 +33,7 @@ var FONT_STYLES = {
 } # Typography hierarchy presets, see https://material.io/design/typography/the-type-system.html#type-scale
 const DIR_FOLDER_PATTERN = "\\w+(?!.*\\w)"
 
-var font_resources = []
+var font_resources = {}
 
 var _font_file_regex = RegEx.new()
 var _font_weight_regexes = {
@@ -132,7 +132,7 @@ func load_fonts(dir):
 		directory.list_dir_end()
 
 		if not font_resource.weights.empty():
-			font_resources.append(font_resource)
+			font_resources[font_resource.name] = font_resource
 		else:
 			push_warning("UI Design Tool: Unable to locate usable .ttf files from %s, check README.md for proper directory/filename structure" % dir)
 	else:
@@ -143,7 +143,7 @@ func load_fonts(dir):
 
 # Find font and weight name of given font data, return null if not found
 func get_font_and_weight_name(font_data):
-	for res in font_resources:
+	for res in font_resources.values():
 		for property in inst2dict(res.weights).keys():
 			if property == "@subpath" or property == "@path":
 				continue
@@ -156,11 +156,7 @@ func get_font_and_weight_name(font_data):
 
 # Find font resource with font name
 func get_font_resource(font_name):
-	var font_resource
-	for res in font_resources:
-		if res.name == font_name:
-			return res
-	return null
+	return font_resources.get(font_name)
 
 # Declaration of font type with weights
 class FontResource:
