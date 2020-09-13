@@ -236,6 +236,5 @@ const FONT_WEIGHT = {
 	"semi_bold": 600,
 	"bold": 700,
 	"extra_bold": 800,
-	"black": 900,
-	"extra_black": 1000
+	"black": 900
 }
