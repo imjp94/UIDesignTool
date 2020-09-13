@@ -62,6 +62,7 @@ onready var FontClear = $FontClear
 onready var ColorClear = $ColorClear
 onready var RectSizeRefresh = $RectSizeRefresh
 
+var _is_visible_yet = false # Always True after it has visible once, mainly used to auto load fonts
 var _object_orig_font_color = Color.white # Font color of object when FontColor pressed
 var _object_orig_highlight # Highlight(StyleBoxFlat) when Highlight pressed
 var _object_orig_font_formatting # FontManager.FontFormatting object when FontFormatting item selected
@@ -76,6 +77,8 @@ func _init():
 				push_warning("UI Design Tool: An error occurred when trying to access %s, ERROR: %d" % [CONFIG_DIR, result])
 
 func _ready():
+	hide()
+	connect("visibility_changed", self, "_on_visibility_changed")
 	# FontFamily
 	FontFamily.connect("item_selected", self, "_on_FontFamily_item_selected")
 	FontWeight.connect("item_selected", self, "_on_FontWeight_item_selected")
@@ -109,9 +112,12 @@ func _ready():
 	# Others
 	RectSizeRefresh.connect("pressed", self, "_on_RectSizeRefresh_pressed")
 
-	var fonts_dir = config.get_value(CONFIG_SECTION_META, CONFIG_KEY_FONTS_DIR, "")
-	if not fonts_dir.empty():
-		_on_FontFamilyFileDialog_dir_selected(fonts_dir)
+func _on_visibility_changed():
+	if not _is_visible_yet and visible:
+		var fonts_dir = config.get_value(CONFIG_SECTION_META, CONFIG_KEY_FONTS_DIR, "")
+		if not fonts_dir.empty():
+			_on_FontFamilyFileDialog_dir_selected(fonts_dir)
+		_is_visible_yet = true
 
 # Change font object with undo/redo
 func change_font(object, to):
