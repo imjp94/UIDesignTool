@@ -385,7 +385,7 @@ func _on_FontWeight_item_selected(index):
 		change_font_data(focused_object, font_data) # TODO: Doesn't support '_italic'
 	
 func _on_FontFamilyLoadButton_pressed():
-	FontFamilyFileDialog.popup()
+	FontFamilyFileDialog.popup_centered()
 
 func _on_FontFamilyFileDialog_dir_selected(dir):
 	selected_font_root_dir = dir
@@ -481,7 +481,7 @@ func _bold_or_italic():
 	return font_family
 
 func _on_FontColor_pressed():
-	FontColorPopupPanel.popup()
+	Utils.popup_on_target(FontColorPopupPanel, FontColor)
 
 	if focused_object:
 		if focused_object is RichTextLabel:
@@ -512,7 +512,7 @@ func _on_FontColor_PopupPanel_popup_hide():
 	change_font_color(focused_object, font_color)
 
 func _on_Highlight_pressed():
-	HighlightPopupPanel.popup()
+	Utils.popup_on_target(HighlightPopupPanel, Highlight)
 	if focused_object:
 		var style_box_flat = focused_object.get(PROPERTY_HIGHLIGHT)
 		if focused_object is Panel or focused_object is PanelContainer:
