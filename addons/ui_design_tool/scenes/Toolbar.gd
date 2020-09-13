@@ -159,8 +159,8 @@ func change_font_size(object, to):
 func change_font_color(object, to):
 	var from = _object_orig_font_color
 	undo_redo.create_action("Change Font Color")
-	undo_redo.add_do_method(self, "set_font_color", object, to if to else false) # Godot bug, varargs ignore null
-	undo_redo.add_undo_method(self, "set_font_color", object, from if from else false)
+	undo_redo.add_do_method(self, "set_font_color", object, to if to is Color else false) # Godot bug, varargs ignore null
+	undo_redo.add_undo_method(self, "set_font_color", object, from if from is Color else false)
 	undo_redo.commit_action()
 
 # Change highlight(StyleBoxFlat) with undo/redo
@@ -504,8 +504,12 @@ func _on_FontColor_PopupPanel_popup_hide():
 	if not focused_object:
 		return
 
+	var current_font_color = focused_object.get(PROPERTY_FONT_COLOR)
+	var font_color
+	if current_font_color or _object_orig_font_color:
+		font_color = FontColorColorPicker.color
 	# Color selected
-	change_font_color(focused_object, FontColorColorPicker.color)
+	change_font_color(focused_object, font_color)
 
 func _on_Highlight_pressed():
 	HighlightPopupPanel.popup()
@@ -719,7 +723,7 @@ func set_font_size(object, font_size):
 
 # font color setter, toolbar gets updated after called
 func set_font_color(object, font_color):
-	font_color = font_color if font_color else null
+	font_color = font_color if font_color is Color else null
 	if object is RichTextLabel:
 		object.set(PROPERTY_FONT_COLOR_DEFAULT, font_color)
 	else:
