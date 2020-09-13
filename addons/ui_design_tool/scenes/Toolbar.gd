@@ -713,7 +713,7 @@ func set_font_size(object, font_size):
 
 # font color setter, toolbar gets updated after called
 func set_font_color(object, font_color):
-	font_color = font_color if font_color != null else null
+	font_color = font_color if font_color else null
 	if object is RichTextLabel:
 		object.set(PROPERTY_FONT_COLOR_DEFAULT, font_color)
 	else:
