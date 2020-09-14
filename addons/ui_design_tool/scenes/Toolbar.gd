@@ -40,10 +40,10 @@ onready var FontFamily = $FontFamily
 onready var FontFamilyFileDialog = $FontFamilyLoadButton/FontFamilyFileDialog
 onready var FontFamilyLoadButton = $FontFamilyLoadButton
 onready var FontFamilyRefresh = $FontFamilyRefresh
-onready var FontWeight = $FontWeight
 onready var FontSize = $FontSize
 onready var FontSizePreset = $FontSize/FontSizePreset
 onready var Bold = $Bold
+onready var BoldPopupMenu = $Bold/PopupMenu
 onready var Italic = $Italic
 onready var Underline = $Underline
 onready var FontColor = $FontColor
@@ -81,7 +81,6 @@ func _ready():
 	connect("visibility_changed", self, "_on_visibility_changed")
 	# FontFamily
 	FontFamily.connect("item_selected", self, "_on_FontFamily_item_selected")
-	FontWeight.connect("item_selected", self, "_on_FontWeight_item_selected")
 	FontFamilyFileDialog.connect("dir_selected", self, "_on_FontFamilyFileDialog_dir_selected")
 	FontFamilyLoadButton.connect("pressed", self, "_on_FontFamilyLoadButton_pressed")
 	FontFamilyRefresh.connect("pressed", self, "_on_FontFamilyRefresh_pressed")
@@ -90,6 +89,7 @@ func _ready():
 	FontSize.connect("text_entered", self, "_on_FontSize_text_entered")
 	# Bold
 	Bold.connect("pressed", self, "_on_Bold_pressed")
+	BoldPopupMenu.connect("id_pressed", self, "_on_BoldPopupMenu_id_pressed")
 	# Italic
 	Italic.connect("pressed", self, "_on_Italic_pressed")
 	# FontColor
@@ -197,7 +197,6 @@ func reflect_font_family_control():
 				for i in FontFamily.get_item_count():
 					if FontFamily.get_item_text(i) == font_face.font_family:
 						FontFamily.selected = i
-						reset_font_weight_control()
 						reflect_font_weight_control()
 						return
 	
@@ -211,11 +210,10 @@ func reflect_font_weight_control():
 			var font_face = font_manager.get_font_face(dynamic_font.font_data)
 			if font_face:
 				var font_weight = font_face.font_weight
-				if font_face.font_style == FontManager.FONT_STYLE.ITALIC:
-					font_weight += "_italic"
-				for i in FontWeight.get_item_count():
-					if FontWeight.get_item_text(i).to_lower().replace(" ", "_") == font_weight:
-						FontWeight.selected = i
+
+				for i in BoldPopupMenu.get_item_count():
+					if FontManager.FONT_WEIGHT[font_weight.replace("-", "_")] == int(BoldPopupMenu.get_item_text(i).substr(0, 3)):
+						Bold.hint_tooltip = BoldPopupMenu.get_item_text(i).substr(6)
 						return true
 	return false
 
@@ -233,24 +231,34 @@ func reflect_font_size_control():
 func reflect_bold_italic_control():
 	if FontFamily.get_item_count():
 		var font_family_name = FontFamily.get_item_text(FontFamily.selected)
-		var font_weight = FontWeight.get_item_text(FontWeight.selected).to_lower().replace(" ", "_") if font_family_name != "None" else ""
+		# TODO: Better way to get current item text from PopupMenu than hint_tooltip
+		var font_weight = Bold.hint_tooltip.to_lower().replace("-", "_")
 		var font_family = font_manager.get_font_family(font_family_name)
 
-		Bold.disabled = not font_family.bold if font_family else true
-		Italic.disabled = not font_family.regular.italic if font_family else true
-		Bold.pressed = false
-		Italic.pressed = false
-		match font_weight:
-			"bold_italic":
-				Bold.pressed = true
-				Italic.pressed = true
-			"bold":
-				Bold.pressed = true
-				Italic.disabled = not font_family.bold.italic
-			_:
-				if font_weight.find("italic") > -1:
-					Italic.pressed = true
-					Bold.disabled = not font_family.bold.italic
+		Bold.disabled = font_family == null
+		var dynamic_font = focused_object.get(PROPERTY_FONT) if focused_object else null
+		if dynamic_font:
+			var font_face = font_manager.get_font_face(dynamic_font.font_data)
+			if font_face:
+				var is_italic = font_face.font_style == FontManager.FONT_STYLE.ITALIC
+				Italic.pressed = is_italic
+				if not is_italic:
+					if font_family:
+						Italic.disabled = not ("italic" in font_family.get(font_weight))
+					else:
+						Italic.disabled = true
+				else:
+					Italic.disabled = false
+		else:
+			Italic.pressed = false
+			Italic.disabled = true
+
+		var is_none = font_family_name == "None"
+		var font_weights = FontManager.FONT_WEIGHT.keys()
+		for i in font_weights.size():
+			var font_face = font_family.get(font_weights[i]) if font_family else null
+			var font_data = font_face.normal if font_face else null
+			BoldPopupMenu.set_item_disabled(i, true if is_none else font_data == null)
 	else:
 		Bold.disabled = true
 		Italic.disabled = true
@@ -311,29 +319,6 @@ func reflect_font_formatting_control():
 func reset_font_family_control():
 	if FontFamily.get_item_count():
 		FontFamily.selected = FontFamily.get_item_count() - 1
-	FontWeight.clear()
-
-# Reset font weight on toolbar
-func reset_font_weight_control():
-	if focused_object is RichTextLabel:
-		FontWeight.disabled = true
-		return
-	else:
-		FontWeight.disabled = false
-
-	if FontFamily.get_item_count():
-		var font_family_name = FontFamily.get_item_text(FontFamily.selected)
-		var font_family = font_manager.get_font_family(font_family_name)
-		FontWeight.clear()
-		for font_weight in FontManager.FONT_WEIGHT.keys():
-			var font_faces = font_family.get(font_weight)
-			for font_face in font_faces.values():
-				var name = font_face.font_weight
-				if font_face.font_style == FontManager.FONT_STYLE.ITALIC:
-					name += " italic"
-				FontWeight.add_item(name.capitalize())
-	else:
-		FontWeight.clear()
 
 func _on_FontFamily_item_selected(index):
 	if not focused_object:
@@ -364,26 +349,6 @@ func _on_FontFamily_item_selected(index):
 		else:
 			change_font_data(focused_object, font_family.regular.normal.data) # TODO: Get fallback weight if regular not found
 
-func _on_FontWeight_item_selected(index):
-	if not focused_object:
-		return
-
-	if focused_object is RichTextLabel:
-		return
-
-	var font_family_name = FontFamily.get_item_text(FontFamily.selected)
-	var font_weight = FontWeight.get_item_text(index).to_lower().replace("-", "_").replace(" ", "_")
-	var font_family = font_manager.get_font_family(font_family_name)
-	
-	var dynamic_font = focused_object.get(PROPERTY_FONT)
-	if dynamic_font:
-		var is_italic = true if font_manager._font_italic_regex.search(font_weight) else false
-		font_weight = font_weight.replace("_italic", "")
-		var style = FontManager.get_font_style_str(FontManager.FONT_STYLE.ITALIC if is_italic else FontManager.FONT_STYLE.NORMAL)
-		var font_face = font_family.get(font_weight).get(style)
-		var font_data = font_face.data
-		change_font_data(focused_object, font_data) # TODO: Doesn't support '_italic'
-	
 func _on_FontFamilyLoadButton_pressed():
 	FontFamilyFileDialog.popup_centered()
 
@@ -422,63 +387,45 @@ func _on_Bold_pressed():
 	if not focused_object:
 		return
 
-	var font_family = _bold_or_italic()
-	if not font_family:
+	Utils.popup_on_target(BoldPopupMenu, Bold)
+
+func _on_BoldPopupMenu_id_pressed(index):
+	if not focused_object:
 		return
 
-	var bold = Bold.pressed
-	var italic = Italic.pressed
-	if bold == italic:
-		if not bold:
-			can_italic_active(font_family)
-	else:
-		can_italic_active(font_family)
+	var font_weight = BoldPopupMenu.get_item_text(index).substr(6)
+	Bold.hint_tooltip = font_weight
 
-	if Italic.disabled:
-		Italic.pressed = false
+	if focused_object is RichTextLabel:
+		return
+
+	var font_family_name = FontFamily.get_item_text(FontFamily.selected)
+	font_weight = font_weight.to_lower().replace("-", "_")
+	var font_family = font_manager.get_font_family(font_family_name)
+	
+	var dynamic_font = focused_object.get(PROPERTY_FONT)
+	if dynamic_font:
+		var font_faces = font_family.get(font_weight)
+		var font_face = font_faces.normal
+		if Italic.pressed:
+			if font_faces.has("italic"):
+				font_face = font_faces.italic
+		var font_data = font_face.data
+		change_font_data(focused_object, font_data)
 
 func _on_Italic_pressed():
 	if not focused_object:
 		return
 
-	var font_family = _bold_or_italic()
-	if not font_family:
-		return
-
-	var bold = Italic.pressed
-	var italic = Bold.pressed
-	if bold == italic:
-		if not bold:
-			can_bold_active(font_family)
-	else:
-		can_bold_active(font_family)
-
-	if Bold.disabled:
-		Bold.pressed = false
-
-func _bold_or_italic():
-	var bold = Bold.pressed
-	var italic = Italic.pressed
-
 	var font_family_name = FontFamily.get_item_text(FontFamily.selected)
 	var font_family = font_manager.get_font_family(font_family_name)
 	if not font_family:
-		return null
+		return
 	
-	var font_face = font_family.regular.italic if Italic.pressed else font_family.regular.normal
-	font_face = font_family.bold.italic if Bold.pressed else font_face
-	if bold and italic:
-		font_face = font_family.bold.italic
-	elif bold:
-		font_face = font_family.bold.normal
-	elif italic:
-		font_face = font_family.regular.italic
-	else:
-		font_face = font_family.regular.normal 
-
+	var font_weight = Bold.hint_tooltip.to_lower().replace("-", "_")
+	var font_faces = font_family.get(font_weight)
+	var font_face = font_faces.get("italic") if Italic.pressed else font_faces.normal
 	change_font_data(focused_object, font_face.data)
-
-	return font_family
 
 func _on_FontColor_pressed():
 	Utils.popup_on_target(FontColorPopupPanel, FontColor)
@@ -575,8 +522,9 @@ func _on_FontFormatting_item_selected(index):
 		return
 	var font_formatting = font_manager.FONT_FORMATTINGS[FontFormatting.get_item_text(index)]
 
+	# TODO: Better way to get current item text from PopupMenu than hint_tooltip
 	_object_orig_font_formatting= FontManager.FontFormatting.new(
-		FontWeight.get_item_text(FontWeight.selected).to_lower().replace(" ", "_"), dynamic_font.size, dynamic_font.extra_spacing_char)
+		BoldPopupMenu.get_item_text(Bold.hint_tooltip.to_lower().replace("-", "_")), dynamic_font.size, dynamic_font.extra_spacing_char)
 	change_font_formatting(focused_object, font_formatting)
 
 func _on_FontClear_pressed():
@@ -655,7 +603,6 @@ func _on_font_changed(new_font):
 			if font_face:
 				reflect_font_family_control()
 		else:
-			reset_font_weight_control()
 			reflect_font_weight_control()
 
 	reflect_font_size_control()
@@ -792,17 +739,3 @@ func create_new_font_obj(font_data, size=null):
 	if size:
 		font.size = size
 	return font
-
-# Check if focused_object can be bold-ed
-func can_bold_active(font_family):
-	if Italic.pressed:
-		Bold.disabled = not font_family.bold.italic
-	else:
-		Bold.disabled = not font_family.bold
-
-# Check if focused_object can be italic-ed
-func can_italic_active(font_family):
-	if Bold.pressed:
-		Italic.disabled = not font_family.bold.italic
-	else:
-		Italic.disabled = not font_family.regular.italic
