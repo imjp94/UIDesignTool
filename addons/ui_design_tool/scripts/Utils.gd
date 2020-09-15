@@ -48,3 +48,14 @@ static func popup_on_target(popup, target):
 			break
 	popup.set_position(cp_rect.position)
 	popup.popup()
+
+# Roughly calculate the display size of option button regarding to the display_text
+static func get_option_button_display_size(option_button, display_text):
+	# TODO: Improve accuracy
+	# Use default theme if not assingned
+	var theme = option_button.get_theme() if option_button.get_theme() else Theme.new()
+	var string_size = theme.get_font("font", "fonts").get_string_size(display_text)
+	var arrow_icon = theme.get_icon("arrow", "styles")
+	# Takes arrow icon size into account
+	string_size.x += arrow_icon.get_width()
+	return string_size
