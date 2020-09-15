@@ -25,6 +25,7 @@ const PROPERTY_ALIGN = "align"
 
 const DEFAULT_FONT_SIZE = 16
 const FONT_FAMILY_REFERENCE_STRING = "____________" # Reference text to calculate display size of FontFamily
+const FONT_FORMATTING_REFERENCE_STRING = "HEADING_1_" # Reference text to calculate display size of FontFormatting
 
 # Reference passed down from EditorPlugin
 var focused_object setget set_focused_object # Editor editing object
@@ -108,6 +109,8 @@ func _ready():
 	AlignCenter.connect("pressed", self, "_on_AlignCenter_pressed")
 	AlignRight.connect("pressed", self, "_on_AlignRight_pressed")
 	# FontFormatting
+	FontFormatting.clip_text = true
+	FontFormatting.rect_min_size.x = Utils.get_option_button_display_size(FontFormatting, FONT_FORMATTING_REFERENCE_STRING).x
 	FontFormatting.connect("item_selected", self, "_on_FontFormatting_item_selected")
 	# Format Clear
 	FontClear.connect("pressed", self, "_on_FontClear_pressed")
@@ -525,8 +528,10 @@ func _on_FontFormatting_item_selected(index):
 	var dynamic_font = focused_object.get(PROPERTY_FONT)
 	if not dynamic_font:
 		return
-	var font_formatting = font_manager.FONT_FORMATTINGS[FontFormatting.get_item_text(index)]
 
+	var font_formatting_name = FontFormatting.get_item_text(index)
+	var font_formatting = font_manager.FONT_FORMATTINGS[font_formatting_name]
+	FontFormatting.hint_tooltip = font_formatting_name
 	# TODO: Better way to get current item text from PopupMenu than hint_tooltip
 	_object_orig_font_formatting= FontManager.FontFormatting.new(
 		Bold.hint_tooltip.to_lower().replace("-", "_"), dynamic_font.size, dynamic_font.extra_spacing_char)
