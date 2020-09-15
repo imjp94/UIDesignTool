@@ -40,9 +40,9 @@ var config = ConfigFile.new() # Config file of user preference
 
 # Toolbar UI
 onready var FontFamily = $FontFamily
-onready var FontFamilyFileDialog = $FontFamilyLoadButton/FontFamilyFileDialog
-onready var FontFamilyLoadButton = $FontFamilyLoadButton
-onready var FontFamilyRefresh = $FontFamilyRefresh
+onready var FontFamilyOptions = $FontFamilyOptions
+onready var FontFamilyOptionsPopupMenu = $FontFamilyOptions/PopupMenu
+onready var FontFamilyFileDialog = $FontFamilyFileDialog
 onready var FontSize = $FontSize
 onready var FontSizePreset = $FontSize/FontSizePreset
 onready var Bold = $Bold
@@ -87,9 +87,9 @@ func _ready():
 	FontFamily.clip_text = true
 	FontFamily.rect_min_size.x = Utils.get_option_button_display_size(FontFamily, FONT_FAMILY_REFERENCE_STRING).x 
 	FontFamily.connect("item_selected", self, "_on_FontFamily_item_selected")
+	FontFamilyOptions.connect("pressed", self, "_on_FontFamilyOptions_pressed")
+	FontFamilyOptionsPopupMenu.connect("id_pressed", self, "_on_FontFamilyOptionsPopupMenu_id_pressed")
 	FontFamilyFileDialog.connect("dir_selected", self, "_on_FontFamilyFileDialog_dir_selected")
-	FontFamilyLoadButton.connect("pressed", self, "_on_FontFamilyLoadButton_pressed")
-	FontFamilyRefresh.connect("pressed", self, "_on_FontFamilyRefresh_pressed")
 	# FontSize
 	FontSizePreset.connect("item_selected", self, "_on_FontSizePreset_item_selected")
 	FontSize.connect("text_entered", self, "_on_FontSize_text_entered")
@@ -388,8 +388,17 @@ func _on_FontFamily_item_selected(index):
 		else:
 			change_font_data(focused_object, font_family.regular.normal.data) # TODO: Get fallback weight if regular not found
 
-func _on_FontFamilyLoadButton_pressed():
-	FontFamilyFileDialog.popup_centered()
+
+func _on_FontFamilyOptions_pressed():
+	if focused_object:
+		Utils.popup_on_target(FontFamilyOptionsPopupMenu, FontFamilyOptions)
+
+func _on_FontFamilyOptionsPopupMenu_id_pressed(index):
+	match index:
+		0:
+			FontFamilyFileDialog.popup_centered()
+		1:
+			_on_FontFamilyFileDialog_dir_selected(selected_font_root_dir)
 
 func _on_FontFamilyFileDialog_dir_selected(dir):
 	selected_font_root_dir = dir
@@ -405,9 +414,6 @@ func _on_FontFamilyFileDialog_dir_selected(dir):
 		config.save(CONFIG_DIR)
 	else:
 		print("Failed to load fonts")
-
-func _on_FontFamilyRefresh_pressed():
-	_on_FontFamilyFileDialog_dir_selected(selected_font_root_dir)
 
 func _on_FontSizePreset_item_selected(index):
 	if not focused_object:
