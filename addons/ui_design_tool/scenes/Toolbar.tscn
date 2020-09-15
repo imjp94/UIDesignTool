@@ -227,11 +227,11 @@ margin_left = 392.0
 margin_right = 396.0
 margin_bottom = 24.0
 
-[node name="AlignLeft" type="Button" parent="."]
-margin_left = 400.0
-margin_right = 430.0
+[node name="HorizontalAlign" type="Button" parent="."]
+margin_left = 426.0
+margin_right = 456.0
 margin_bottom = 24.0
-hint_tooltip = "Align left"
+hint_tooltip = "Horizontal Align"
 toggle_mode = true
 icon = ExtResource( 14 )
 flat = true
@@ -239,29 +239,10 @@ __meta__ = {
 "_editor_description_": ""
 }
 
-[node name="AlignCenter" type="Button" parent="."]
-margin_left = 434.0
-margin_right = 464.0
-margin_bottom = 24.0
-hint_tooltip = "Align center"
-toggle_mode = true
-icon = ExtResource( 13 )
-flat = true
-__meta__ = {
-"_editor_description_": ""
-}
-
-[node name="AlignRight" type="Button" parent="."]
-margin_left = 468.0
-margin_right = 498.0
-margin_bottom = 24.0
-hint_tooltip = "Align right"
-toggle_mode = true
-icon = ExtResource( 12 )
-flat = true
-__meta__ = {
-"_editor_description_": ""
-}
+[node name="PopupMenu" type="PopupMenu" parent="HorizontalAlign"]
+margin_right = 20.0
+margin_bottom = 20.0
+items = [ "", ExtResource( 14 ), 0, false, false, 0, 0, null, "", false, "", ExtResource( 13 ), 0, false, false, 1, 0, null, "", false, "", ExtResource( 12 ), 0, false, false, 2, 0, null, "", false ]
 
 [node name="VSeparator3" type="VSeparator" parent="."]
 margin_left = 502.0
