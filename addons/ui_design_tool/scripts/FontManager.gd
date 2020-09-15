@@ -3,15 +3,15 @@ extends Object
 const FONT_FILE_PATTERN = "\\.ttf$"
 const FONT_WEIGHT_PATTERNS = {
 	"thin": "(?i)(-|_)thin",
-	"extra-light": "(?i)(-|_)extralight",
+	"extra_light": "(?i)(-|_)extralight",
 	"light": "(?i)(-|_)light",
 	"regular": "(?i)(-|_)regular",
 	"medium": "(?i)(-|_)medium",
-	"semi-bold": "(?i)(-|_)semibold",
+	"semi_bold": "(?i)(-|_)semibold",
 	"bold": "(?i)(-|_)bold",
-	"extra-bold": "(?i)(-|_)extrabold",
+	"extra_bold": "(?i)(-|_)extrabold",
 	"black": "(?i)(-|_)black",
-	"extra-black": "(?i)(-|_)extrablack"
+	"extra_black": "(?i)(-|_)extrablack"
 }
 const FONT_ITALIC_PATTERN = "(?i)italic"
 const FONT_ITALIC_ONLY_PATTERN = "(?i)(-|_)italic"
@@ -38,15 +38,15 @@ var font_families = {}
 var _font_file_regex = RegEx.new()
 var _font_weight_regexes = {
 	"thin": RegEx.new(),
-	"extra-light": RegEx.new(),
+	"extra_light": RegEx.new(),
 	"light": RegEx.new(),
 	"regular": RegEx.new(),
 	"medium": RegEx.new(),
-	"semi-bold": RegEx.new(),
+	"semi_bold": RegEx.new(),
 	"bold": RegEx.new(),
-	"extra-bold": RegEx.new(),
+	"extra_bold": RegEx.new(),
 	"black": RegEx.new(),
-	"extra-black": RegEx.new()
+	"extra_black": RegEx.new()
 }
 var _font_italic_regex = RegEx.new()
 var _font_italic_only_regex = RegEx.new()
