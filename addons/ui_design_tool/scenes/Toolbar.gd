@@ -62,9 +62,8 @@ onready var HorizontalAlignPopupMenu = $HorizontalAlign/PopupMenu
 onready var VerticalAlign = $VerticalAlign
 onready var VerticalAlignPopupMenu = $VerticalAlign/PopupMenu
 onready var FontFormatting = $FontFormatting
-onready var FontClear = $FontClear
-onready var ColorClear = $ColorClear
-onready var RectSizeRefresh = $RectSizeRefresh
+onready var Tools = $Tools
+onready var ToolsPopupMenu = $Tools/PopupMenu
 
 var _is_visible_yet = false # Always True after it has visible once, mainly used to auto load fonts
 var _object_orig_font_color = Color.white # Font color of object when FontColor pressed
@@ -122,11 +121,9 @@ func _ready():
 	FontFormatting.clip_text = true
 	FontFormatting.rect_min_size.x = Utils.get_option_button_display_size(FontFormatting, FONT_FORMATTING_REFERENCE_STRING).x
 	FontFormatting.connect("item_selected", self, "_on_FontFormatting_item_selected")
-	# Format Clear
-	FontClear.connect("pressed", self, "_on_FontClear_pressed")
-	ColorClear.connect("pressed", self, "_on_ColorClear_pressed")
-	# Others
-	RectSizeRefresh.connect("pressed", self, "_on_RectSizeRefresh_pressed")
+	# Tools
+	Tools.connect("pressed", self, "_on_Tools_pressed")
+	ToolsPopupMenu.connect("id_pressed", self, "_on_ToolsPopupMenu_id_pressed")
 
 func _on_visibility_changed():
 	if not _is_visible_yet and visible:
@@ -578,6 +575,22 @@ func _on_FontFormatting_item_selected(index):
 	_object_orig_font_formatting= FontManager.FontFormatting.new(
 		Bold.hint_tooltip.to_lower().replace("-", "_"), dynamic_font.size, dynamic_font.extra_spacing_char)
 	change_font_formatting(focused_object, font_formatting)
+
+func _on_Tools_pressed():
+	if focused_object:
+		Utils.popup_on_target(ToolsPopupMenu, Tools)
+
+func _on_ToolsPopupMenu_id_pressed(index):
+	if not focused_object:
+		return
+
+	match index:
+		0: # Font Clear
+			_on_FontClear_pressed()
+		1: # Color Clear
+			_on_ColorClear_pressed()
+		2: # Rect Size Refresh
+			_on_RectSizeRefresh_pressed()
 
 func _on_FontClear_pressed():
 	if not focused_object:

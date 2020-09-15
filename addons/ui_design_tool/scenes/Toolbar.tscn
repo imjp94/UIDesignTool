@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=2]
+[gd_scene load_steps=20 format=2]
 
 [ext_resource path="res://addons/ui_design_tool/scenes/Toolbar.gd" type="Script" id=1]
 [ext_resource path="res://addons/ui_design_tool/assets/icons/format_bold-white-18dp.svg" type="Texture" id=2]
@@ -18,6 +18,7 @@
 [ext_resource path="res://addons/ui_design_tool/assets/icons/vertical_align_top-white-18dp.svg" type="Texture" id=16]
 [ext_resource path="res://addons/ui_design_tool/assets/icons/vertical_align_center-white-18dp.svg" type="Texture" id=17]
 [ext_resource path="res://addons/ui_design_tool/assets/icons/more_vert-white-18dp.svg" type="Texture" id=18]
+[ext_resource path="res://addons/ui_design_tool/assets/icons/more_horiz-white-18dp.svg" type="Texture" id=19]
 
 [node name="Toolbar" type="HBoxContainer"]
 script = ExtResource( 1 )
@@ -279,36 +280,15 @@ text = "Heading 1"
 items = [ "Heading 1", null, false, 0, null, "Heading 2", null, false, 1, null, "Heading 3", null, false, 2, null, "Heading 4", null, false, 3, null, "Heading 5", null, false, 4, null, "Heading 6", null, false, 5, null, "Subtitle 1", null, false, 6, null, "Subtitle 2", null, false, 7, null, "Body 1", null, false, 8, null, "Body 2", null, false, 9, null, "Button", null, false, 10, null, "Caption", null, false, 11, null, "Overline", null, false, 12, null ]
 selected = 0
 
-[node name="FontClear" type="Button" parent="."]
-margin_left = 607.0
-margin_right = 637.0
+[node name="Tools" type="Button" parent="."]
+margin_left = 569.0
+margin_right = 599.0
 margin_bottom = 24.0
-hint_tooltip = "Clear Font"
-icon = ExtResource( 11 )
+hint_tooltip = "Tools"
+icon = ExtResource( 19 )
 flat = true
-__meta__ = {
-"_editor_description_": ""
-}
 
-[node name="ColorClear" type="Button" parent="."]
-margin_left = 641.0
-margin_right = 671.0
-margin_bottom = 24.0
-hint_tooltip = "Clear Color"
-icon = ExtResource( 6 )
-flat = true
-__meta__ = {
-"_editor_description_": ""
-}
-
-[node name="RectSizeRefresh" type="Button" parent="."]
-margin_left = 675.0
-margin_right = 705.0
-margin_bottom = 24.0
-hint_tooltip = "Refresh Rect Size
-*Force control to recalculate its own rect_size"
-icon = ExtResource( 7 )
-flat = true
-__meta__ = {
-"_editor_description_": ""
-}
+[node name="PopupMenu" type="PopupMenu" parent="Tools"]
+margin_right = 20.0
+margin_bottom = 20.0
+items = [ "Font Clear", ExtResource( 11 ), 0, false, false, 0, 0, null, "", false, "Color Clear", ExtResource( 6 ), 0, false, false, 1, 0, null, "", false, "Rect Size Refresh", ExtResource( 7 ), 0, false, false, 2, 0, null, "", false ]
