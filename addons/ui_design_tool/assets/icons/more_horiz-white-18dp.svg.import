@@ -1,0 +1,34 @@
+[remap]
+
+importer="texture"
+type="StreamTexture"
+path="res://.import/more_horiz-white-18dp.svg-2292c39c5fef87774f0dcabbf9749663.stex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://addons/ui_design_tool/assets/icons/more_horiz-white-18dp.svg"
+dest_files=[ "res://.import/more_horiz-white-18dp.svg-2292c39c5fef87774f0dcabbf9749663.stex" ]
+
+[params]
+
+compress/mode=0
+compress/lossy_quality=0.7
+compress/hdr_mode=0
+compress/bptc_ldr=0
+compress/normal_map=0
+flags/repeat=0
+flags/filter=true
+flags/mipmaps=false
+flags/anisotropic=false
+flags/srgb=2
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/HDR_as_SRGB=false
+process/invert_color=false
+stream=false
+size_limit=0
+detect_3d=true
+svg/scale=1.0
