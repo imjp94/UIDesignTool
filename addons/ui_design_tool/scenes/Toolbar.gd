@@ -212,7 +212,7 @@ func reflect_font_weight_control():
 				var font_weight = font_face.font_weight
 
 				for i in BoldPopupMenu.get_item_count():
-					if font_weight.replace("-", "_") == BoldPopupMenu.get_item_text(i):
+					if font_weight.replace("-", "_") == BoldPopupMenu.get_item_text(i).to_lower().replace("-", "_"):
 						Bold.hint_tooltip = BoldPopupMenu.get_item_text(i)
 						return true
 	return false
@@ -393,14 +393,13 @@ func _on_BoldPopupMenu_id_pressed(index):
 	if not focused_object:
 		return
 
-	var font_weight = BoldPopupMenu.get_item_text(index)
-	Bold.hint_tooltip = font_weight
+	Bold.hint_tooltip = BoldPopupMenu.get_item_text(index)
 
 	if focused_object is RichTextLabel:
 		return
 
 	var font_family_name = FontFamily.get_item_text(FontFamily.selected)
-	font_weight = font_weight.to_lower().replace("-", "_")
+	var font_weight = Bold.hint_tooltip .to_lower().replace("-", "_")
 	var font_family = font_manager.get_font_family(font_family_name)
 	
 	var dynamic_font = focused_object.get(PROPERTY_FONT)
