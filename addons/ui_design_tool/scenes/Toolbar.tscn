@@ -113,7 +113,7 @@ __meta__ = {
 [node name="PopupMenu" type="PopupMenu" parent="Bold"]
 margin_right = 20.0
 margin_bottom = 20.0
-items = [ "100 - Thin", null, 0, false, false, 0, 0, null, "", false, "200 - Extra-Light", null, 0, false, false, 1, 0, null, "", false, "300 - Light", null, 0, false, false, 2, 0, null, "", false, "400 - Regular", null, 0, false, false, 3, 0, null, "", false, "500 - Medium", null, 0, false, false, 4, 0, null, "", false, "600 - Semi-Bold", null, 0, false, false, 5, 0, null, "", false, "700 - Bold", null, 0, false, false, 6, 0, null, "", false, "800 - Extra-Bold", null, 0, false, false, 7, 0, null, "", false, "900 - Black", null, 0, false, false, 8, 0, null, "", false ]
+items = [ "Thin", null, 0, false, false, 0, 0, null, "", false, "Extra-Light", null, 0, false, false, 1, 0, null, "", false, "Light", null, 0, false, false, 2, 0, null, "", false, "Regular", null, 0, false, false, 3, 0, null, "", false, "Medium", null, 0, false, false, 4, 0, null, "", false, "Semi-Bold", null, 0, false, false, 5, 0, null, "", false, "Bold", null, 0, false, false, 6, 0, null, "", false, "Extra-Bold", null, 0, false, false, 7, 0, null, "", false, "Black", null, 0, false, false, 8, 0, null, "", false ]
 
 [node name="Italic" type="Button" parent="."]
 margin_left = 256.0
