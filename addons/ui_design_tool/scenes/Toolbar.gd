@@ -529,7 +529,7 @@ func _on_FontFormatting_item_selected(index):
 
 	# TODO: Better way to get current item text from PopupMenu than hint_tooltip
 	_object_orig_font_formatting= FontManager.FontFormatting.new(
-		BoldPopupMenu.get_item_text(Bold.hint_tooltip.to_lower().replace("-", "_")), dynamic_font.size, dynamic_font.extra_spacing_char)
+		Bold.hint_tooltip.to_lower().replace("-", "_"), dynamic_font.size, dynamic_font.extra_spacing_char)
 	change_font_formatting(focused_object, font_formatting)
 
 func _on_FontClear_pressed():
