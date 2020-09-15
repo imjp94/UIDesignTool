@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=18 format=2]
 
 [ext_resource path="res://addons/ui_design_tool/scenes/Toolbar.gd" type="Script" id=1]
 [ext_resource path="res://addons/ui_design_tool/assets/icons/format_bold-white-18dp.svg" type="Texture" id=2]
@@ -14,6 +14,9 @@
 [ext_resource path="res://addons/ui_design_tool/assets/icons/format_align_right-white-18dp.svg" type="Texture" id=12]
 [ext_resource path="res://addons/ui_design_tool/assets/icons/format_align_center-white-18dp.svg" type="Texture" id=13]
 [ext_resource path="res://addons/ui_design_tool/assets/icons/format_align_left-white-18dp.svg" type="Texture" id=14]
+[ext_resource path="res://addons/ui_design_tool/assets/icons/vertical_align_bottom-white-18dp.svg" type="Texture" id=15]
+[ext_resource path="res://addons/ui_design_tool/assets/icons/vertical_align_top-white-18dp.svg" type="Texture" id=16]
+[ext_resource path="res://addons/ui_design_tool/assets/icons/vertical_align_center-white-18dp.svg" type="Texture" id=17]
 
 [node name="Toolbar" type="HBoxContainer"]
 script = ExtResource( 1 )
@@ -242,7 +245,24 @@ __meta__ = {
 [node name="PopupMenu" type="PopupMenu" parent="HorizontalAlign"]
 margin_right = 20.0
 margin_bottom = 20.0
-items = [ "", ExtResource( 14 ), 0, false, false, 0, 0, null, "", false, "", ExtResource( 13 ), 0, false, false, 1, 0, null, "", false, "", ExtResource( 12 ), 0, false, false, 2, 0, null, "", false ]
+items = [ "", ExtResource( 14 ), 0, false, false, 0, 0, 0, "", false, "", ExtResource( 13 ), 0, false, false, 1, 0, 1, "", false, "", ExtResource( 12 ), 0, false, false, 2, 0, 2, "", false ]
+
+[node name="VerticalAlign" type="Button" parent="."]
+margin_left = 460.0
+margin_right = 490.0
+margin_bottom = 24.0
+hint_tooltip = "Vertical Align"
+toggle_mode = true
+icon = ExtResource( 16 )
+flat = true
+__meta__ = {
+"_editor_description_": ""
+}
+
+[node name="PopupMenu" type="PopupMenu" parent="VerticalAlign"]
+margin_right = 20.0
+margin_bottom = 20.0
+items = [ "", ExtResource( 16 ), 0, false, false, 0, 0, 0, "", false, "", ExtResource( 17 ), 0, false, false, 1, 0, 1, "", false, "", ExtResource( 15 ), 0, false, false, 2, 0, 2, "", false ]
 
 [node name="VSeparator3" type="VSeparator" parent="."]
 margin_left = 502.0
