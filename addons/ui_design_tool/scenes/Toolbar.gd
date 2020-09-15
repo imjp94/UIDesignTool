@@ -24,6 +24,7 @@ const PROPERTY_HIGHLIGHT_PANEL = "custom_styles/panel"
 const PROPERTY_ALIGN = "align"
 
 const DEFAULT_FONT_SIZE = 16
+const FONT_FAMILY_REFERENCE_STRING = "____________" # Reference text to calculate display size of FontFamily
 
 # Reference passed down from EditorPlugin
 var focused_object setget set_focused_object # Editor editing object
@@ -80,6 +81,8 @@ func _ready():
 	hide()
 	connect("visibility_changed", self, "_on_visibility_changed")
 	# FontFamily
+	FontFamily.clip_text = true
+	FontFamily.rect_min_size.x = Utils.get_option_button_display_size(FontFamily, FONT_FAMILY_REFERENCE_STRING).x 
 	FontFamily.connect("item_selected", self, "_on_FontFamily_item_selected")
 	FontFamilyFileDialog.connect("dir_selected", self, "_on_FontFamilyFileDialog_dir_selected")
 	FontFamilyLoadButton.connect("pressed", self, "_on_FontFamilyLoadButton_pressed")
@@ -195,11 +198,14 @@ func reflect_font_family_control():
 			var font_face = font_manager.get_font_face(dynamic_font.font_data)
 			if font_face:
 				for i in FontFamily.get_item_count():
-					if FontFamily.get_item_text(i) == font_face.font_family:
+					var font_family_name = FontFamily.get_item_text(i)
+					if font_family_name == font_face.font_family:
+						FontFamily.hint_tooltip = font_family_name
 						FontFamily.selected = i
 						reflect_font_weight_control()
 						return
 	
+	FontFamily.hint_tooltip = "Font Family"
 	reset_font_family_control()
 
 # Reflect font weight of focused_object to toolbar, always call reflect_font_family_control first
@@ -597,11 +603,9 @@ func _on_font_changed(new_font):
 	if not new_font:
 		reset_font_family_control()
 	else:
-		if not font_family: # Current font not equal to FontFamily selected
-			var font_face = font_manager.get_font_face(new_font.font_data)
-			if font_face:
-				reflect_font_family_control()
-		else:
+		var font_face = font_manager.get_font_face(new_font.font_data)
+		if font_face:
+			reflect_font_family_control()
 			reflect_font_weight_control()
 
 	reflect_font_size_control()
