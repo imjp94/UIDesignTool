@@ -22,6 +22,7 @@ const PROPERTY_FONT_COLOR_DEFAULT = "custom_colors/default_color"
 const PROPERTY_HIGHLIGHT = "custom_styles/normal"
 const PROPERTY_HIGHLIGHT_PANEL = "custom_styles/panel"
 const PROPERTY_ALIGN = "align"
+const PROPERTY_VALIGN = "valign"
 
 const DEFAULT_FONT_SIZE = 16
 const FONT_FAMILY_REFERENCE_STRING = "____________" # Reference text to calculate display size of FontFamily
@@ -58,6 +59,8 @@ onready var HighlightColorPicker = $Highlight/PopupPanel/ColorPicker
 onready var HighlightPopupPanel = $Highlight/PopupPanel
 onready var HorizontalAlign = $HorizontalAlign
 onready var HorizontalAlignPopupMenu = $HorizontalAlign/PopupMenu
+onready var VerticalAlign = $VerticalAlign
+onready var VerticalAlignPopupMenu = $VerticalAlign/PopupMenu
 onready var FontFormatting = $FontFormatting
 onready var FontClear = $FontClear
 onready var ColorClear = $ColorClear
@@ -109,6 +112,12 @@ func _ready():
 	HorizontalAlignPopupMenu.set_item_metadata(0, Label.ALIGN_LEFT)
 	HorizontalAlignPopupMenu.set_item_metadata(1, Label.ALIGN_CENTER)
 	HorizontalAlignPopupMenu.set_item_metadata(2, Label.ALIGN_RIGHT)
+	# VerticalAlign
+	VerticalAlign.connect("pressed", self, "_on_VerticalAlign_pressed")
+	VerticalAlignPopupMenu.connect("id_pressed", self, "_on_VerticalAlignPopupMenu_id_pressed")
+	VerticalAlignPopupMenu.set_item_metadata(0, Label.VALIGN_TOP)
+	VerticalAlignPopupMenu.set_item_metadata(1, Label.VALIGN_CENTER)
+	VerticalAlignPopupMenu.set_item_metadata(2, Label.VALIGN_BOTTOM)
 	# FontFormatting
 	FontFormatting.clip_text = true
 	FontFormatting.rect_min_size.x = Utils.get_option_button_display_size(FontFormatting, FONT_FORMATTING_REFERENCE_STRING).x
@@ -184,7 +193,14 @@ func change_align(object, to):
 	undo_redo.create_action("Change Align")
 	undo_redo.add_do_method(self, "set_align", object, to)
 	undo_redo.add_undo_method(self, "set_align", object, from)
-	undo_redo.commit_action()	
+	undo_redo.commit_action()
+
+func change_valign(object, to):
+	var from = object.get(PROPERTY_VALIGN)
+	undo_redo.create_action("Change VAlign")
+	undo_redo.add_do_method(self, "set_valign", object, to)
+	undo_redo.add_undo_method(self, "set_valign", object, from)
+	undo_redo.commit_action()
 
 # Change font style(FontManager.FontFormatting) with undo/redo
 func change_font_formatting(object, to):
@@ -314,6 +330,23 @@ func reflect_align_control():
 			HorizontalAlign.icon = icon
 	else:
 		HorizontalAlign.disabled = true
+
+func reflect_valign_control():
+	var valign = focused_object.get(PROPERTY_VALIGN) if focused_object else null
+	if valign != null:
+		var icon
+		VerticalAlign.disabled = false
+		match valign:
+			Label.VALIGN_TOP:
+				icon = VerticalAlignPopupMenu.get_item_icon(0)
+			Label.VALIGN_CENTER:
+				icon = VerticalAlignPopupMenu.get_item_icon(1)
+			Label.VALIGN_BOTTOM:
+				icon = VerticalAlignPopupMenu.get_item_icon(2)
+		if icon:
+			VerticalAlign.icon = icon
+	else:
+		VerticalAlign.disabled = true
 
 # Reflect font style of focused_object to toolbar, it only check if focused_object can applied with style
 func reflect_font_formatting_control():
@@ -515,6 +548,15 @@ func _on_HorizontalAlignPopupMenu_id_pressed(index):
 		HorizontalAlign.icon = HorizontalAlignPopupMenu.get_item_icon(index)
 		change_align(focused_object, HorizontalAlignPopupMenu.get_item_metadata(index))
 
+func _on_VerticalAlign_pressed():
+	if focused_object:
+		Utils.popup_on_target(VerticalAlignPopupMenu, VerticalAlign)
+
+func _on_VerticalAlignPopupMenu_id_pressed(index):
+	if focused_object:
+		VerticalAlign.icon = VerticalAlignPopupMenu.get_item_icon(index)
+		change_valign(focused_object, VerticalAlignPopupMenu.get_item_metadata(index))
+
 func _on_FontFormatting_item_selected(index):
 	if not focused_object:
 		return
@@ -576,6 +618,7 @@ func _on_focused_object_changed(new_focused_object):
 	reflect_highlight_control()
 	reflect_bold_italic_control()
 	reflect_align_control()
+	reflect_valign_control()
 	reflect_font_formatting_control()
 	
 # focused_property changed when user select different property in inspector
@@ -645,6 +688,11 @@ func _on_align_changed(align):
 
 	emit_signal("property_edited", PROPERTY_ALIGN)
 
+func _on_valign_changed(valing):
+	reflect_valign_control()
+
+	emit_signal("property_edited", PROPERTY_VALIGN)
+
 # font data setter, toolbar gets updated after called
 func set_font_data(object, font_data):
 	font_data = font_data if font_data else null # font might be bool false, as Godot ignore null for varargs
@@ -692,6 +740,10 @@ func set_highlight(object, highlight):
 func set_align(object, align):
 	object.set(PROPERTY_ALIGN, align)
 	_on_align_changed(align)
+
+func set_valign(object, valign):
+	object.set(PROPERTY_VALIGN, valign)
+	_on_valign_changed(valign)
 
 # font style setter, toolbar gets updated after called
 func set_font_formatting(object, font_formatting):
