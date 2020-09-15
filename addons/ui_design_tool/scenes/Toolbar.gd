@@ -56,9 +56,8 @@ onready var Highlight = $Highlight
 onready var HighlightColorRect = $Highlight/ColorRect
 onready var HighlightColorPicker = $Highlight/PopupPanel/ColorPicker
 onready var HighlightPopupPanel = $Highlight/PopupPanel
-onready var AlignLeft = $AlignLeft
-onready var AlignCenter = $AlignCenter
-onready var AlignRight = $AlignRight
+onready var HorizontalAlign = $HorizontalAlign
+onready var HorizontalAlignPopupMenu = $HorizontalAlign/PopupMenu
 onready var FontFormatting = $FontFormatting
 onready var FontClear = $FontClear
 onready var ColorClear = $ColorClear
@@ -104,10 +103,12 @@ func _ready():
 	Highlight.connect("pressed", self, "_on_Highlight_pressed")
 	HighlightColorPicker.connect("color_changed", self, "_on_Highlight_ColorPicker_color_changed")
 	HighlightPopupPanel.connect("popup_hide", self, "_on_Highlight_PopupPanel_popup_hide")
-	# Align
-	AlignLeft.connect("pressed", self, "_on_AlignLeft_pressed")
-	AlignCenter.connect("pressed", self, "_on_AlignCenter_pressed")
-	AlignRight.connect("pressed", self, "_on_AlignRight_pressed")
+	# HorizontalAlign
+	HorizontalAlign.connect("pressed", self, "_on_HorizontalAlign_pressed")
+	HorizontalAlignPopupMenu.connect("id_pressed", self, "_on_HorizontalAlignPopupMenu_id_pressed")
+	HorizontalAlignPopupMenu.set_item_metadata(0, Label.ALIGN_LEFT)
+	HorizontalAlignPopupMenu.set_item_metadata(1, Label.ALIGN_CENTER)
+	HorizontalAlignPopupMenu.set_item_metadata(2, Label.ALIGN_RIGHT)
 	# FontFormatting
 	FontFormatting.clip_text = true
 	FontFormatting.rect_min_size.x = Utils.get_option_button_display_size(FontFormatting, FONT_FORMATTING_REFERENCE_STRING).x
@@ -299,24 +300,20 @@ func reflect_highlight_control():
 # Reflect horizontal align of focused_object to toolbar
 func reflect_align_control():
 	var align = focused_object.get(PROPERTY_ALIGN) if focused_object else null
-	AlignLeft.pressed = false
-	AlignCenter.pressed = false
-	AlignRight.pressed = false
 	if align != null:
-		AlignLeft.disabled = false
-		AlignCenter.disabled = false
-		AlignRight.disabled = false
+		var icon
+		HorizontalAlign.disabled = false
 		match align:
 			Label.ALIGN_LEFT:
-				AlignLeft.pressed = true
+				icon = HorizontalAlignPopupMenu.get_item_icon(0)
 			Label.ALIGN_CENTER:
-				AlignCenter.pressed = true
+				icon = HorizontalAlignPopupMenu.get_item_icon(1)
 			Label.ALIGN_RIGHT:
-				AlignRight.pressed = true
+				icon = HorizontalAlignPopupMenu.get_item_icon(2)
+		if icon:
+			HorizontalAlign.icon = icon
 	else:
-		AlignLeft.disabled = true
-		AlignCenter.disabled = true
-		AlignRight.disabled = true
+		HorizontalAlign.disabled = true
 
 # Reflect font style of focused_object to toolbar, it only check if focused_object can applied with style
 func reflect_font_formatting_control():
@@ -509,17 +506,14 @@ func _on_Highlight_PopupPanel_popup_hide():
 		style_box_flat.bg_color = HighlightColorPicker.color
 	change_highlight(focused_object, style_box_flat)
 
-func _on_AlignLeft_pressed():
+func _on_HorizontalAlign_pressed():
 	if focused_object:
-		change_align(focused_object, Label.ALIGN_LEFT)
+		Utils.popup_on_target(HorizontalAlignPopupMenu, HorizontalAlign)
 
-func _on_AlignCenter_pressed():
+func _on_HorizontalAlignPopupMenu_id_pressed(index):
 	if focused_object:
-		change_align(focused_object, Label.ALIGN_CENTER)
-
-func _on_AlignRight_pressed():
-	if focused_object:
-		change_align(focused_object, Label.ALIGN_RIGHT)
+		HorizontalAlign.icon = HorizontalAlignPopupMenu.get_item_icon(index)
+		change_align(focused_object, HorizontalAlignPopupMenu.get_item_metadata(index))
 
 func _on_FontFormatting_item_selected(index):
 	if not focused_object:
