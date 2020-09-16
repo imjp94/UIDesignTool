@@ -435,7 +435,11 @@ func _on_BoldPopupMenu_id_pressed(index):
 	if not focused_object:
 		return
 
-	Bold.hint_tooltip = BoldPopupMenu.get_item_text(index)
+	var font_weight_text = BoldPopupMenu.get_item_text(index)
+	if font_weight_text == Bold.hint_tooltip:
+		return
+
+	Bold.hint_tooltip = font_weight_text
 
 	if focused_object is RichTextLabel:
 		return
@@ -549,7 +553,10 @@ func _on_HorizontalAlign_pressed():
 func _on_HorizontalAlignPopupMenu_id_pressed(index):
 	if focused_object:
 		HorizontalAlign.icon = HorizontalAlignPopupMenu.get_item_icon(index)
-		change_align(focused_object, HorizontalAlignPopupMenu.get_item_metadata(index))
+		var selected_align = HorizontalAlignPopupMenu.get_item_metadata(index)
+		var current_align = focused_object.get(PROPERTY_ALIGN)
+		if current_align != selected_align:
+			change_align(focused_object, selected_align)
 
 func _on_VerticalAlign_pressed():
 	if focused_object:
@@ -558,7 +565,10 @@ func _on_VerticalAlign_pressed():
 func _on_VerticalAlignPopupMenu_id_pressed(index):
 	if focused_object:
 		VerticalAlign.icon = VerticalAlignPopupMenu.get_item_icon(index)
-		change_valign(focused_object, VerticalAlignPopupMenu.get_item_metadata(index))
+		var selected_valign = VerticalAlignPopupMenu.get_item_metadata(index)
+		var current_valign = focused_object.get(PROPERTY_VALIGN)
+		if current_valign != selected_valign:
+			change_valign(focused_object, selected_valign)
 
 func _on_FontFormatting_item_selected(index):
 	if not focused_object:
