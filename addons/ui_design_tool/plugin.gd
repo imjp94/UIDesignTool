@@ -7,6 +7,7 @@ var menu
 var overlay_text_edit
 
 var editor_inspector = get_editor_interface().get_inspector()
+var editor_selection = get_editor_interface().get_selection()
 
 
 func _enter_tree():
@@ -18,6 +19,7 @@ func _enter_tree():
 	overlay_text_edit.connect("property_edited", self, "_on_OverlayTextEdit_property_edited")
 
 	editor_inspector.connect("property_selected", self, "_on_property_selected")
+	editor_selection.connect("selection_changed", self, "_on_selection_changed")
 
 	add_control_to_container(EditorPlugin.CONTAINER_CANVAS_EDITOR_BOTTOM, menu)
 	add_control_to_container(EditorPlugin.CONTAINER_CANVAS_EDITOR_BOTTOM, overlay_text_edit)
@@ -51,11 +53,26 @@ func forward_canvas_gui_input(event):
 func make_visible(visible):
 	if menu:
 		menu.visible = visible
-	# overlay_text_edit only visible on double click
+	#overlay_text_edit only visible on double click
 
 func _on_property_selected(property):
 	menu.focused_property = property
 	menu.focused_inspector = editor_inspector.get_focus_owner()
+
+func _on_selection_changed():
+	var selections = editor_selection.get_selected_nodes()
+	var is_visible = false
+	var focused_object = null
+	# TODO: Support batch edit
+	if selections.size() == 1:
+		var selection = selections[0]
+		if selection is Control:
+			focused_object = selection
+			is_visible = true
+
+	menu.visible = is_visible
+	menu.focused_object = focused_object
+	overlay_text_edit.focused_object = focused_object
 
 func _on_Toolbar_property_edited(property):
 	editor_inspector.refresh()
