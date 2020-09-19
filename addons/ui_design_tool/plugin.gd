@@ -3,7 +3,7 @@ extends EditorPlugin
 const Toolbar = preload("scenes/Toolbar.tscn")
 const OverlayTextEdit = preload("scenes/OverlayTextEdit.tscn")
 
-var menu
+var toolbar
 var overlay_text_edit
 
 var editor_inspector = get_editor_interface().get_inspector()
@@ -11,9 +11,9 @@ var editor_selection = get_editor_interface().get_selection()
 
 
 func _enter_tree():
-	menu = Toolbar.instance()
-	menu.undo_redo = get_undo_redo()
-	menu.connect("property_edited", self, "_on_Toolbar_property_edited")
+	toolbar = Toolbar.instance()
+	toolbar.undo_redo = get_undo_redo()
+	toolbar.connect("property_edited", self, "_on_Toolbar_property_edited")
 	overlay_text_edit = OverlayTextEdit.instance()
 	overlay_text_edit.undo_redo = get_undo_redo()
 	overlay_text_edit.connect("property_edited", self, "_on_OverlayTextEdit_property_edited")
@@ -21,12 +21,12 @@ func _enter_tree():
 	editor_inspector.connect("property_selected", self, "_on_property_selected")
 	editor_selection.connect("selection_changed", self, "_on_selection_changed")
 
-	add_control_to_container(EditorPlugin.CONTAINER_CANVAS_EDITOR_BOTTOM, menu)
+	add_control_to_container(EditorPlugin.CONTAINER_CANVAS_EDITOR_BOTTOM, toolbar)
 	add_control_to_container(EditorPlugin.CONTAINER_CANVAS_EDITOR_BOTTOM, overlay_text_edit)
 
 func _exit_tree():
-	if menu:
-		menu.queue_free()
+	if toolbar:
+		toolbar.queue_free()
 	if overlay_text_edit:
 		overlay_text_edit.queue_free()
 
@@ -41,19 +41,19 @@ func forward_canvas_gui_input(event):
 	if event is InputEventMouseButton:
 		if event.button_index == BUTTON_LEFT:
 			if event.doubleclick: # Always false when selected multiple nodes
-				if menu.focused_objects:
+				if toolbar.focused_objects:
 					overlay_text_edit.popup()
 				return true
 	return false
 
 func make_visible(visible):
-	if menu:
-		menu.visible = visible
+	if toolbar:
+		toolbar.visible = visible
 	#overlay_text_edit only visible on double click
 
 func _on_property_selected(property):
-	menu.focused_property = property
-	menu.focused_inspector = editor_inspector.get_focus_owner()
+	toolbar.focused_property = property
+	toolbar.focused_inspector = editor_inspector.get_focus_owner()
 
 func _on_selection_changed():
 	var selections = editor_selection.get_selected_nodes()
@@ -76,8 +76,8 @@ func _on_selection_changed():
 	else:
 		focused_objects = []
 
-	menu.visible = is_visible
-	menu.focused_objects = focused_objects
+	toolbar.visible = is_visible
+	toolbar.focused_objects = focused_objects
 	overlay_text_edit.focused_objects = focused_objects
 
 func _on_Toolbar_property_edited(property):
