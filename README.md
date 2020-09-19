@@ -8,19 +8,23 @@ Import/manage font source files and styling UI directly in the editor viewport.
 
 ## Features
 
-- Import and manage TrueType fonts(.ttf)
-- Edit text directly in editor viewport
-- Basic styling operations:
-  - Font type
-  - Font weight
-  - Font size
-  - Font color
+- Overlay Text Editor
+- Toolbar(Support batch edit):
+  - Font:
+    - Import and manage TrueType fonts(.ttf)
+    - Font family
+    - Font weight
+    - Font size
+    - Font color
   - Highlight
-  - Horizontal alignment
+  - Horizontal/Vertical alignment
   - Font Style/Formatting(Typography hierarchy)
-  - Clear font
-  - Clear color
-  - Rect size refresh
+  - Utilities:
+    - Clear font
+    - Clear color
+    - Rect size refresh
+
+> For more detail list, check [CHANGELOG.md](CHANGELOG.md)
 
 ## Installation
 
@@ -39,6 +43,7 @@ or
 ![Show Overlay Text Editor](screenshots/toolbar_preview.png "Show Overlay Text Editor")
 
 Select any `Control` node will show the toolbar at the bottom of 2D screen viewport, otherwise, it will stay hidden.
+Select multiple nodes to edit simultaneously.
 
 ### Overlay Text Editor
 
