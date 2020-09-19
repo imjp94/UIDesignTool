@@ -3,7 +3,7 @@ extends TextEdit
 
 signal property_edited(property)
 
-var focused_object
+var focused_objects
 var undo_redo
 
 var _object_orig_text = ""
@@ -15,9 +15,9 @@ func _ready():
 	hide()
 
 func _on_text_changed():
-	if focused_object:
+	if focused_objects:
 		# TODO: Option to set bbcode_text if is RichTextLabel
-		focused_object.set("text", text)
+		focused_objects.back().set("text", text)
 
 func _on_focused_exited():
 	if get_menu().visible: # Support right-click context menu
@@ -25,12 +25,14 @@ func _on_focused_exited():
 
 	hide()
 	# TODO: More efficient way to handle undo/redo of text, right now, whole chunks of string is cached everytime
-	change_text(focused_object, text)
+	change_text(focused_objects.back(), text)
 
 # Popup at mouse position
 func popup():
-	if not focused_object:
+	if not focused_objects:
 		return
+
+	var focused_object = focused_objects.back()
 	if not ("text" in focused_object):
 		return
 
