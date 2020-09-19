@@ -29,7 +29,7 @@ const FONT_FAMILY_REFERENCE_STRING = "____________" # Reference text to calculat
 const FONT_FORMATTING_REFERENCE_STRING = "HEADING_1_" # Reference text to calculate display size of FontFormatting
 
 # Reference passed down from EditorPlugin
-var focused_object setget set_focused_object # Editor editing object
+var focused_objects = [] setget set_focused_object # Editor editing object
 var focused_property setget set_focused_property # Editor editing property
 var focused_inspector setget set_focused_inspector # Editor editing inspector
 var undo_redo
@@ -207,9 +207,13 @@ func change_font_formatting(object, to):
 	undo_redo.add_undo_method(self, "set_font_formatting", object, from if from else false)
 	undo_redo.commit_action()
 
-# Reflect font name of focused_object to toolbar
+# Reflect font name of focused_objects to toolbar
 func reflect_font_family_control():
-	var dynamic_font = focused_object.get(PROPERTY_FONT) if focused_object else null
+	var obj = focused_objects.back() if focused_objects else null
+	if not obj:
+		return
+
+	var dynamic_font = obj.get(PROPERTY_FONT) if obj else null
 	if dynamic_font:
 		if dynamic_font.font_data:
 			var font_face = font_manager.get_font_face(dynamic_font.font_data)
@@ -225,9 +229,13 @@ func reflect_font_family_control():
 	FontFamily.hint_tooltip = "Font Family"
 	reset_font_family_control()
 
-# Reflect font weight of focused_object to toolbar, always call reflect_font_family_control first
+# Reflect font weight of focused_objects to toolbar, always call reflect_font_family_control first
 func reflect_font_weight_control():
-	var dynamic_font = focused_object.get(PROPERTY_FONT) if focused_object else null
+	var obj = focused_objects.back() if focused_objects else null
+	if not obj:
+		return
+
+	var dynamic_font = obj.get(PROPERTY_FONT) if obj else null
 	if dynamic_font:
 		if dynamic_font.font_data:
 			var font_face = font_manager.get_font_face(dynamic_font.font_data)
@@ -240,9 +248,13 @@ func reflect_font_weight_control():
 						return true
 	return false
 
-# Reflect font size of focused_object to toolbar, always call reflect_font_family_control first
+# Reflect font size of focused_objects to toolbar, always call reflect_font_family_control first
 func reflect_font_size_control():
-	var dynamic_font = focused_object.get(PROPERTY_FONT) if focused_object else null
+	var obj = focused_objects.back() if focused_objects else null
+	if not obj:
+		return
+
+	var dynamic_font = obj.get(PROPERTY_FONT) if obj else null
 	FontSize.text = str(dynamic_font.size) if dynamic_font else str(DEFAULT_FONT_SIZE)
 	FontSize.mouse_filter = Control.MOUSE_FILTER_IGNORE if dynamic_font == null else Control.MOUSE_FILTER_STOP
 	var font_size_color = Color.white
@@ -250,8 +262,12 @@ func reflect_font_size_control():
 	FontSize.set(PROPERTY_FONT_COLOR, font_size_color)
 	FontSizePreset.disabled = dynamic_font == null
 
-# Reflect bold/italic of focused_object to toolbar, always call reflect_font_family_control first
+# Reflect bold/italic of focused_objects to toolbar, always call reflect_font_family_control first
 func reflect_bold_italic_control():
+	var obj = focused_objects.back() if focused_objects else null
+	if not obj:
+		return
+
 	if FontFamily.get_item_count():
 		var font_family_name = FontFamily.get_item_text(FontFamily.selected)
 		# TODO: Better way to get current item text from PopupMenu than hint_tooltip
@@ -259,7 +275,7 @@ func reflect_bold_italic_control():
 		var font_family = font_manager.get_font_family(font_family_name)
 
 		Bold.disabled = font_family == null
-		var dynamic_font = focused_object.get(PROPERTY_FONT) if focused_object else null
+		var dynamic_font = obj.get(PROPERTY_FONT) if obj else null
 		if dynamic_font:
 			var font_face = font_manager.get_font_face(dynamic_font.font_data)
 			if font_face:
@@ -288,20 +304,28 @@ func reflect_bold_italic_control():
 		Bold.pressed = false
 		Italic.pressed = false
 
-# Reflect font color of focused_object to toolbar
+# Reflect font color of focused_objects to toolbar
 func reflect_font_color_control():
-	var focused_object_font_color = focused_object.get(PROPERTY_FONT_COLOR) if focused_object else null
+	var obj = focused_objects.back() if focused_objects else null
+	if not obj:
+		return
+
+	var focused_object_font_color = obj.get(PROPERTY_FONT_COLOR) if obj else null
 	var font_color = Color.white
 	if focused_object_font_color != null:
 		font_color = focused_object_font_color
 	FontColorColorRect.color = font_color
 	FontColorColorPicker.color = font_color
 
-# Reflect highlight color of focused_object to toolbar
+# Reflect highlight color of focused_objects to toolbar
 func reflect_highlight_control():
-	var focused_object_highlight = focused_object.get(PROPERTY_HIGHLIGHT) if focused_object else null
-	if focused_object is Panel or focused_object is PanelContainer:
-		focused_object_highlight = focused_object.get(PROPERTY_HIGHLIGHT_PANEL) if focused_object else null
+	var obj = focused_objects.back() if focused_objects else null
+	if not obj:
+		return
+
+	var focused_object_highlight = obj.get(PROPERTY_HIGHLIGHT) if obj else null
+	if obj is Panel or obj is PanelContainer:
+		focused_object_highlight = obj.get(PROPERTY_HIGHLIGHT_PANEL) if obj else null
 
 	var highlight_color = Color.white # default modulate color
 	if focused_object_highlight != null:
@@ -310,9 +334,13 @@ func reflect_highlight_control():
 	HighlightColorRect.color = highlight_color
 	HighlightColorPicker.color = highlight_color
 
-# Reflect horizontal align of focused_object to toolbar
+# Reflect horizontal align of focused_objects to toolbar
 func reflect_align_control():
-	var align = focused_object.get(PROPERTY_ALIGN) if focused_object else null
+	var obj = focused_objects.back() if focused_objects else null
+	if not obj:
+		return
+	
+	var align = obj.get(PROPERTY_ALIGN) if obj else null
 	if align != null:
 		var icon
 		HorizontalAlign.disabled = false
@@ -329,7 +357,11 @@ func reflect_align_control():
 		HorizontalAlign.disabled = true
 
 func reflect_valign_control():
-	var valign = focused_object.get(PROPERTY_VALIGN) if focused_object else null
+	var obj = focused_objects.back() if focused_objects else null
+	if not obj:
+		return
+
+	var valign = obj.get(PROPERTY_VALIGN) if obj else null
 	if valign != null:
 		var icon
 		VerticalAlign.disabled = false
@@ -345,10 +377,14 @@ func reflect_valign_control():
 	else:
 		VerticalAlign.disabled = true
 
-# Reflect font style of focused_object to toolbar, it only check if focused_object can applied with style
+# Reflect font style of focused_objects to toolbar, it only check if focused_objects can applied with style
 func reflect_font_formatting_control():
+	var obj = focused_objects.back() if focused_objects else null
+	if not obj:
+		return
+	
 	# Font Style is not required to be accurate
-	var dynamic_font = focused_object.get(PROPERTY_FONT) if focused_object else null
+	var dynamic_font = obj.get(PROPERTY_FONT) if obj else null
 	FontFormatting.disabled = dynamic_font == null
 
 # Reset font name on toolbar
@@ -357,7 +393,7 @@ func reset_font_family_control():
 		FontFamily.selected = FontFamily.get_item_count() - 1
 
 func _on_FontFamily_item_selected(index):
-	if not focused_object:
+	if not focused_objects:
 		return
 
 	var font_family_name = FontFamily.get_item_text(index)
@@ -369,25 +405,26 @@ func _on_FontFamily_item_selected(index):
 	if not font_family:
 		return
 
-	if focused_object is RichTextLabel:
-		var to = {}
-		to["regular"] = create_new_font_obj(font_family.regular.normal.data) if font_family.regular.normal else null
-		to["bold"] = create_new_font_obj(font_family.bold.normal.data) if font_family.bold.normal else null
-		to["regular_italic"] = create_new_font_obj(font_family.regular.italic.data)  if font_family.regular.italic else null
-		to["bold_italic"] = create_new_font_obj(font_family.bold.italic.data) if font_family.bold.italic else null
-		change_rich_text_fonts(focused_object, to)
-	else:
-		var dynamic_font = focused_object.get(PROPERTY_FONT)
-		if not dynamic_font:
-			var font_size = int(FontSizePreset.get_item_text(FontSizePreset.selected))
-			dynamic_font = create_new_font_obj(font_family.regular.normal.data,  font_size)
-			change_font(focused_object, dynamic_font)
+	for obj in focused_objects:
+		if obj is RichTextLabel:
+			var to = {}
+			to["regular"] = create_new_font_obj(font_family.regular.normal.data) if font_family.regular.normal else null
+			to["bold"] = create_new_font_obj(font_family.bold.normal.data) if font_family.bold.normal else null
+			to["regular_italic"] = create_new_font_obj(font_family.regular.italic.data)  if font_family.regular.italic else null
+			to["bold_italic"] = create_new_font_obj(font_family.bold.italic.data) if font_family.bold.italic else null
+			change_rich_text_fonts(obj, to)
 		else:
-			change_font_data(focused_object, font_family.regular.normal.data) # TODO: Get fallback weight if regular not found
+			var dynamic_font = obj.get(PROPERTY_FONT)
+			if not dynamic_font:
+				var font_size = int(FontSizePreset.get_item_text(FontSizePreset.selected))
+				dynamic_font = create_new_font_obj(font_family.regular.normal.data,  font_size)
+				change_font(obj, dynamic_font)
+			else:
+				change_font_data(obj, font_family.regular.normal.data) # TODO: Get fallback weight if regular not found
 
 
 func _on_FontFamilyOptions_pressed():
-	if focused_object:
+	if focused_objects:
 		Utils.popup_on_target(FontFamilyOptionsPopupMenu, FontFamilyOptions)
 
 func _on_FontFamilyOptionsPopupMenu_id_pressed(index):
@@ -413,26 +450,28 @@ func _on_FontFamilyFileDialog_dir_selected(dir):
 		print("Failed to load fonts")
 
 func _on_FontSizePreset_item_selected(index):
-	if not focused_object:
+	if not focused_objects:
 		return
-
-	var new_font_size_str = FontSizePreset.get_item_text(index)
-	change_font_size(focused_object, int(new_font_size_str))
+	
+	for obj in focused_objects:
+		var new_font_size_str = FontSizePreset.get_item_text(index)
+		change_font_size(obj, int(new_font_size_str))
 
 func _on_FontSize_text_entered(new_text):
-	if not focused_object:
+	if not focused_objects:
 		return
-
-	change_font_size(focused_object, int(FontSize.text))
+	
+	for obj in focused_objects:
+		change_font_size(obj, int(FontSize.text))
 
 func _on_Bold_pressed():
-	if not focused_object:
+	if not focused_objects:
 		return
 
 	Utils.popup_on_target(BoldPopupMenu, Bold)
 
 func _on_BoldPopupMenu_id_pressed(index):
-	if not focused_object:
+	if not focused_objects:
 		return
 
 	var font_weight_text = BoldPopupMenu.get_item_text(index)
@@ -440,26 +479,25 @@ func _on_BoldPopupMenu_id_pressed(index):
 		return
 
 	Bold.hint_tooltip = font_weight_text
-
-	if focused_object is RichTextLabel:
-		return
-
 	var font_family_name = FontFamily.get_item_text(FontFamily.selected)
 	var font_weight = Bold.hint_tooltip .to_lower().replace("-", "_")
 	var font_family = font_manager.get_font_family(font_family_name)
-	
-	var dynamic_font = focused_object.get(PROPERTY_FONT)
-	if dynamic_font:
-		var font_faces = font_family.get(font_weight)
-		var font_face = font_faces.normal
-		if Italic.pressed:
-			if font_faces.has("italic"):
-				font_face = font_faces.italic
-		var font_data = font_face.data
-		change_font_data(focused_object, font_data)
+
+	for obj in focused_objects:
+		if obj is RichTextLabel:
+			continue
+		var dynamic_font = obj.get(PROPERTY_FONT)
+		if dynamic_font:
+			var font_faces = font_family.get(font_weight)
+			var font_face = font_faces.normal
+			if Italic.pressed:
+				if font_faces.has("italic"):
+					font_face = font_faces.italic
+			var font_data = font_face.data
+			change_font_data(obj, font_data)
 
 func _on_Italic_pressed():
-	if not focused_object:
+	if not focused_objects:
 		return
 
 	var font_family_name = FontFamily.get_item_text(FontFamily.selected)
@@ -470,45 +508,56 @@ func _on_Italic_pressed():
 	var font_weight = Bold.hint_tooltip.to_lower().replace("-", "_")
 	var font_faces = font_family.get(font_weight)
 	var font_face = font_faces.get("italic") if Italic.pressed else font_faces.normal
-	change_font_data(focused_object, font_face.data)
+	
+	for obj in focused_objects:
+		change_font_data(obj, font_face.data)
 
 func _on_FontColor_pressed():
-	Utils.popup_on_target(FontColorPopupPanel, FontColor)
+	if not focused_objects:
+		return
 
-	if focused_object:
-		if focused_object is RichTextLabel:
-			_object_orig_font_color = focused_object.get(PROPERTY_FONT_COLOR_DEFAULT) 
-		else:
-			_object_orig_font_color = focused_object.get(PROPERTY_FONT_COLOR) 
+	Utils.popup_on_target(FontColorPopupPanel, FontColor)
+	var obj = focused_objects.back()
+
+	if obj is RichTextLabel:
+		_object_orig_font_color = obj.get(PROPERTY_FONT_COLOR_DEFAULT) 
+	else:
+		_object_orig_font_color = obj.get(PROPERTY_FONT_COLOR) 
 
 func _on_FontColor_ColorPicker_color_changed(color):
-	if not focused_object:
+	if not focused_objects:
 		return
 
-	# Preview only, doesn't stack undo/redo as this is called very frequently
-	if focused_object is RichTextLabel:
-		focused_object.set(PROPERTY_FONT_COLOR_DEFAULT, FontColorColorPicker.color)
-	else:
-		focused_object.set(PROPERTY_FONT_COLOR, FontColorColorPicker.color)
-	FontColorColorRect.color = FontColorColorPicker.color
+	for obj in focused_objects:
+		# Preview only, doesn't stack undo/redo as this is called very frequently
+		if obj is RichTextLabel:
+			obj.set(PROPERTY_FONT_COLOR_DEFAULT, FontColorColorPicker.color)
+		else:
+			obj.set(PROPERTY_FONT_COLOR, FontColorColorPicker.color)
+		FontColorColorRect.color = FontColorColorPicker.color
 
 func _on_FontColor_PopupPanel_popup_hide():
-	if not focused_object:
+	if not focused_objects:
 		return
 
-	var current_font_color = focused_object.get(PROPERTY_FONT_COLOR)
-	var font_color
-	if current_font_color or _object_orig_font_color:
-		font_color = FontColorColorPicker.color
-	# Color selected
-	change_font_color(focused_object, font_color)
+	for obj in focused_objects:
+		var current_font_color = obj.get(PROPERTY_FONT_COLOR)
+		var font_color
+		if current_font_color is Color or _object_orig_font_color is Color:
+			font_color = FontColorColorPicker.color
+		# Color selected
+		change_font_color(obj, font_color)
 
 func _on_Highlight_pressed():
+	if not focused_objects:
+		return
+
 	Utils.popup_on_target(HighlightPopupPanel, Highlight)
-	if focused_object:
-		var style_box_flat = focused_object.get(PROPERTY_HIGHLIGHT)
-		if focused_object is Panel or focused_object is PanelContainer:
-			style_box_flat = focused_object.get(PROPERTY_HIGHLIGHT_PANEL)
+	
+	for obj in focused_objects:
+		var style_box_flat = obj.get(PROPERTY_HIGHLIGHT)
+		if obj is Panel or obj is PanelContainer:
+			style_box_flat = obj.get(PROPERTY_HIGHLIGHT_PANEL)
 		if style_box_flat:
 			_object_orig_highlight = StyleBoxFlat.new()
 			_object_orig_highlight.bg_color = style_box_flat.bg_color
@@ -516,7 +565,7 @@ func _on_Highlight_pressed():
 			_object_orig_highlight = null
 
 func _on_Highlight_ColorPicker_color_changed(color):
-	if not focused_object:
+	if not focused_objects:
 		return
 
 	# Preview only, doesn't stack undo/redo as this is called very frequently
@@ -524,57 +573,66 @@ func _on_Highlight_ColorPicker_color_changed(color):
 	var style_box_flat = StyleBoxFlat.new()
 
 	style_box_flat.bg_color = HighlightColorPicker.color
-	if focused_object is Panel or focused_object is PanelContainer:
-		focused_object.set(PROPERTY_HIGHLIGHT_PANEL, style_box_flat)
-	else:
-		focused_object.set(PROPERTY_HIGHLIGHT, style_box_flat)
+
+	for obj in focused_objects:
+		if obj is Panel or obj is PanelContainer:
+			obj.set(PROPERTY_HIGHLIGHT_PANEL, style_box_flat)
+		else:
+			obj.set(PROPERTY_HIGHLIGHT, style_box_flat)
 
 func _on_Highlight_PopupPanel_popup_hide():
-	if not focused_object:
+	if not focused_objects:
 		return
 
-	var current_highlight
-	if focused_object is Panel or focused_object is PanelContainer:
-		current_highlight = focused_object.get(PROPERTY_HIGHLIGHT_PANEL)
-	else:
-		current_highlight = focused_object.get(PROPERTY_HIGHLIGHT)
+	for obj in focused_objects:
+		var current_highlight
+		if obj is Panel or obj is PanelContainer:
+			current_highlight = obj.get(PROPERTY_HIGHLIGHT_PANEL)
+		else:
+			current_highlight = obj.get(PROPERTY_HIGHLIGHT)
 
-	# Color selected
-	var style_box_flat
-	if current_highlight or _object_orig_highlight:
-		style_box_flat = StyleBoxFlat.new()
-		style_box_flat.bg_color = HighlightColorPicker.color
-	change_highlight(focused_object, style_box_flat)
+		# Color selected
+		var style_box_flat
+		if current_highlight or _object_orig_highlight:
+			style_box_flat = StyleBoxFlat.new()
+			style_box_flat.bg_color = HighlightColorPicker.color
+		change_highlight(obj, style_box_flat)
 
 func _on_HorizontalAlign_pressed():
-	if focused_object:
+	if focused_objects:
 		Utils.popup_on_target(HorizontalAlignPopupMenu, HorizontalAlign)
 
 func _on_HorizontalAlignPopupMenu_id_pressed(index):
-	if focused_object:
+	if not focused_objects:
+		return
+
+	for obj in focused_objects:
 		HorizontalAlign.icon = HorizontalAlignPopupMenu.get_item_icon(index)
 		var selected_align = HorizontalAlignPopupMenu.get_item_metadata(index)
-		var current_align = focused_object.get(PROPERTY_ALIGN)
+		var current_align = obj.get(PROPERTY_ALIGN)
 		if current_align != selected_align:
-			change_align(focused_object, selected_align)
+			change_align(obj, selected_align)
 
 func _on_VerticalAlign_pressed():
-	if focused_object:
+	if focused_objects:
 		Utils.popup_on_target(VerticalAlignPopupMenu, VerticalAlign)
 
 func _on_VerticalAlignPopupMenu_id_pressed(index):
-	if focused_object:
-		VerticalAlign.icon = VerticalAlignPopupMenu.get_item_icon(index)
-		var selected_valign = VerticalAlignPopupMenu.get_item_metadata(index)
-		var current_valign = focused_object.get(PROPERTY_VALIGN)
-		if current_valign != selected_valign:
-			change_valign(focused_object, selected_valign)
-
-func _on_FontFormatting_item_selected(index):
-	if not focused_object:
+	if not focused_objects:
 		return
 
-	var dynamic_font = focused_object.get(PROPERTY_FONT)
+	for obj in focused_objects:
+		VerticalAlign.icon = VerticalAlignPopupMenu.get_item_icon(index)
+		var selected_valign = VerticalAlignPopupMenu.get_item_metadata(index)
+		var current_valign = obj.get(PROPERTY_VALIGN)
+		if current_valign != selected_valign:
+			change_valign(obj, selected_valign)
+
+func _on_FontFormatting_item_selected(index):
+	if not focused_objects:
+		return
+
+	var dynamic_font = focused_objects.back().get(PROPERTY_FONT)
 	if not dynamic_font:
 		return
 
@@ -584,14 +642,16 @@ func _on_FontFormatting_item_selected(index):
 	# TODO: Better way to get current item text from PopupMenu than hint_tooltip
 	_object_orig_font_formatting= FontManager.FontFormatting.new(
 		Bold.hint_tooltip.to_lower().replace("-", "_"), dynamic_font.size, dynamic_font.extra_spacing_char)
-	change_font_formatting(focused_object, font_formatting)
+
+	for obj in focused_objects:
+		change_font_formatting(obj, font_formatting)
 
 func _on_Tools_pressed():
-	if focused_object:
+	if focused_objects:
 		Utils.popup_on_target(ToolsPopupMenu, Tools)
 
 func _on_ToolsPopupMenu_id_pressed(index):
-	if not focused_object:
+	if not focused_objects:
 		return
 
 	match index:
@@ -603,43 +663,46 @@ func _on_ToolsPopupMenu_id_pressed(index):
 			_on_RectSizeRefresh_pressed()
 
 func _on_FontClear_pressed():
-	if not focused_object:
+	if not focused_objects:
 		return
 
-	if focused_object is RichTextLabel:
-		var to = {
-			"regular": null,
-			"bold": null,
-			"regular_italic": null,
-			"bold_italic": null
-		}
-		change_rich_text_fonts(focused_object, to)
-	else:
-		change_font(focused_object, null)
+	for obj in focused_objects:
+		if obj is RichTextLabel:
+			var to = {
+				"regular": null,
+				"bold": null,
+				"regular_italic": null,
+				"bold_italic": null
+			}
+			change_rich_text_fonts(obj, to)
+		else:
+			change_font(obj, null)
 
-	_on_focused_object_changed(focused_object) # Update ui default state
+	_on_focused_object_changed(focused_objects) # Update ui default state
 
 func _on_ColorClear_pressed():
-	if not focused_object:
+	if not focused_objects:
 		return
 
-	if focused_object is RichTextLabel:
-		_object_orig_font_color = focused_object.get(PROPERTY_FONT_COLOR_DEFAULT) 
-	else:
-		_object_orig_font_color = focused_object.get(PROPERTY_FONT_COLOR) 
+	for obj in focused_objects:
+		if obj is RichTextLabel:
+			_object_orig_font_color = obj.get(PROPERTY_FONT_COLOR_DEFAULT) 
+		else:
+			_object_orig_font_color = obj.get(PROPERTY_FONT_COLOR) 
 
-	if focused_object is Panel or focused_object is PanelContainer:
-		_object_orig_highlight = focused_object.get(PROPERTY_HIGHLIGHT_PANEL)
-	else:
-		_object_orig_highlight = focused_object.get(PROPERTY_HIGHLIGHT)
-	change_font_color(focused_object, null)
-	change_highlight(focused_object, null)
+		if obj is Panel or obj is PanelContainer:
+			_object_orig_highlight = obj.get(PROPERTY_HIGHLIGHT_PANEL)
+		else:
+			_object_orig_highlight = obj.get(PROPERTY_HIGHLIGHT)
+		change_font_color(obj, null)
+		change_highlight(obj, null)
 
 func _on_RectSizeRefresh_pressed():
-	if focused_object:
-		focused_object.set("rect_size", Vector2.ZERO)
+	if focused_objects:
+		for obj in focused_objects:
+			obj.set("rect_size", Vector2.ZERO)
 
-# focused_object changed when user select different object in editor
+# focused_objects changed when user select different object in editor
 func _on_focused_object_changed(new_focused_object):	
 	reflect_font_family_control() # Font family must be reflected first
 	reflect_font_size_control()
@@ -706,7 +769,7 @@ func _on_font_color_changed(new_font_color):
 func _on_highlight_changed(new_highlight):
 	reflect_highlight_control()
 
-	if focused_object is Panel or focused_object is PanelContainer:
+	if focused_objects is Panel or focused_objects is PanelContainer:
 		emit_signal("property_edited", PROPERTY_HIGHLIGHT_PANEL)
 	else:
 		emit_signal("property_edited", PROPERTY_HIGHLIGHT)
@@ -796,11 +859,23 @@ func set_font_extra_spacing_char(object, new_spacing):
 	object.get(PROPERTY_FONT).extra_spacing_char = new_spacing
 	# TODO: Add gui for font extra spacing
 
-# focused_object setter, mainly called from EditorPlugin
-func set_focused_object(obj):
-	if focused_object != obj:
-		focused_object = obj
-		_on_focused_object_changed(focused_object)
+# focused_objects setter, mainly called from EditorPlugin
+func set_focused_object(objs):
+	var has_changed = false
+
+	if not objs.empty():
+		if focused_objects.size() == 1 and objs.size() == 1:
+			# Single selection changed
+			has_changed = focused_objects.back() != objs.back()
+		else:
+			has_changed = true
+	else:
+		if not focused_objects.empty():
+			has_changed = true
+
+	if has_changed:
+		focused_objects = objs
+		_on_focused_object_changed(focused_objects)
 
 # focused_property setter, mainly called from EditorPlugin
 func set_focused_property(prop):

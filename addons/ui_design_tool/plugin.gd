@@ -37,15 +37,11 @@ func handles(object):
 	make_visible(false)
 	return false
 
-func edit(object):
-	menu.focused_object = object
-	overlay_text_edit.focused_object = object
-
 func forward_canvas_gui_input(event):
 	if event is InputEventMouseButton:
 		if event.button_index == BUTTON_LEFT:
-			if event.doubleclick:
-				if menu.focused_object:
+			if event.doubleclick: # Always false when selected multiple nodes
+				if menu.focused_objects:
 					overlay_text_edit.popup()
 				return true
 	return false
@@ -62,17 +58,27 @@ func _on_property_selected(property):
 func _on_selection_changed():
 	var selections = editor_selection.get_selected_nodes()
 	var is_visible = false
-	var focused_object = null
-	# TODO: Support batch edit
+	var focused_objects
 	if selections.size() == 1:
 		var selection = selections[0]
 		if selection is Control:
-			focused_object = selection
+			focused_objects = [selection]
 			is_visible = true
+	elif selections.size() > 1:
+		var has_non_control = false
+		for selection in selections:
+			if not (selection is Control):
+				has_non_control = true
+				break
+		if not has_non_control:
+			is_visible = true
+			focused_objects = selections
+	else:
+		focused_objects = []
 
 	menu.visible = is_visible
-	menu.focused_object = focused_object
-	overlay_text_edit.focused_object = focused_object
+	menu.focused_objects = focused_objects
+	overlay_text_edit.focused_objects = focused_objects
 
 func _on_Toolbar_property_edited(property):
 	editor_inspector.refresh()
