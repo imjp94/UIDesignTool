@@ -7,7 +7,7 @@ signal property_edited(name) # Emitted when property edited, mainly to notify in
 
 # Config file to save user preference
 const CONFIG_DIR = "res://addons/ui_design_tool/user_pref.cfg" # Must be abosulte path
-const CONFIG_SECTION_META = "meta"
+const CONFIG_SECTION_META = "path"
 const CONFIG_KEY_FONTS_DIR = "fonts_dir" # Directory to fonts resource
 # Generic font properties
 const PROPERTY_FONT_COLOR = "custom_colors/font_color"
