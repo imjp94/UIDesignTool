@@ -58,7 +58,7 @@ func _on_property_selected(property):
 func _on_selection_changed():
 	var selections = editor_selection.get_selected_nodes()
 	var is_visible = false
-	var focused_objects
+	var focused_objects = []
 	if selections.size() == 1:
 		var selection = selections[0]
 		if selection is Control:
@@ -73,8 +73,6 @@ func _on_selection_changed():
 		if not has_non_control:
 			is_visible = true
 			focused_objects = selections
-	else:
-		focused_objects = []
 
 	toolbar.visible = is_visible
 	toolbar.focused_objects = focused_objects
