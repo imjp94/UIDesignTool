@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1
+
+- Bugfixes:
+  - Fix null exception when selected non-`Control` node
+
 ## 0.2.0
 
 - Features:
