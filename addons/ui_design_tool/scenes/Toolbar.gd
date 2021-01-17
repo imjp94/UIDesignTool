@@ -408,10 +408,10 @@ func _on_FontFamily_item_selected(index):
 	for obj in focused_objects:
 		if obj is RichTextLabel:
 			var to = {}
-			to["regular"] = create_new_font_obj(font_family.regular.normal.data) if font_family.regular.normal else null
-			to["bold"] = create_new_font_obj(font_family.bold.normal.data) if font_family.bold.normal else null
-			to["regular_italic"] = create_new_font_obj(font_family.regular.italic.data)  if font_family.regular.italic else null
-			to["bold_italic"] = create_new_font_obj(font_family.bold.italic.data) if font_family.bold.italic else null
+			to["regular"] = create_new_font_obj(font_family.regular.normal.data) if font_family.regular.get("normal") else null
+			to["bold"] = create_new_font_obj(font_family.bold.normal.data) if font_family.bold.get("normal") else null
+			to["regular_italic"] = create_new_font_obj(font_family.regular.italic.data)  if font_family.regular.get("italic") else null
+			to["bold_italic"] = create_new_font_obj(font_family.bold.italic.data) if font_family.bold.get("italic") else null
 			change_rich_text_fonts(obj, to)
 		else:
 			var dynamic_font = obj.get(PROPERTY_FONT)
