@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.2
+
+- Improvements:
+  - Exclude unwanted files from export
+- Bugfixes:
+  - Fix null exception when set font on `RichTextLabel`
+
 ## 0.2.1
 
 - Bugfixes:
