@@ -76,11 +76,11 @@ func _init():
 
 # Load root dir of font resources, check Readme for directory structure
 func load_root_dir(root_dir):
-	var directory = Directory.new()
-	var result = directory.open(root_dir)
+	var directory = DirAccess.open(root_dir)
+	var result = DirAccess.get_open_error()
 	if result == OK:
 		font_families.clear()
-		directory.list_dir_begin(true) # Skip . and .. directory and hidden
+		directory.list_dir_begin()  # Skip . and .. directory and hidden# TODOGODOT4 fill missing arguments https://github.com/godotengine/godot/pull/40547
 		var dir = directory.get_next()
 		while dir != "":
 			if not directory.current_is_dir():
@@ -98,12 +98,12 @@ func load_root_dir(root_dir):
 
 # Load fonts data from directory, check Readme for filename pattern
 func load_fonts(dir):
-	var directory = Directory.new()
-	var result = directory.open(dir)
+	var directory = DirAccess.open(dir)
+	var result = DirAccess.get_open_error()
 	if result == OK:
 		var font_family_name = _dir_folder_regex.search(dir).get_string()
 		var font_family = FontFamily.new(font_family_name)
-		directory.list_dir_begin(true) # Skip . and .. directory and hidden
+		directory.list_dir_begin()
 		var filename = directory.get_next()
 		while filename != "":
 			if directory.current_is_dir():
@@ -133,7 +133,7 @@ func load_fonts(dir):
 			filename = directory.get_next()
 		directory.list_dir_end()
 
-		if not font_family.empty():
+		if not font_family.is_empty():
 			font_families[font_family.name] = font_family
 		else:
 			push_warning("UI Design Tool: Unable to locate usable .ttf files from %s, check README.md for proper directory/filename structure" % dir)
@@ -181,10 +181,10 @@ class FontFamily:
 		var font_faces = get(font_face.font_weight.replace('-', '_'))
 		font_faces[FONT_STYLE.keys()[font_face.font_style].to_lower()] = font_face
 
-	func empty():
+	func is_empty():
 		for font_weight in FONT_WEIGHT.keys():
 			var font_faces = get(font_weight)
-			if not font_faces.values().empty():
+			if not font_faces.values().is_empty():
 				return false
 		return true
 
@@ -210,7 +210,7 @@ class FontFace:
 # Declaration of font style TODO: Custom resource to define font style
 class FontFormatting:
 	var font_weight = "regular"
-	var font_style = FONT_STYLE.NORMAL
+	var font_style = 0 # FONT_STYLE.NORMAL
 	var size = 16
 	var letter_spacing = 0
 

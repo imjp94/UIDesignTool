@@ -1,4 +1,4 @@
-tool
+@tool
 extends TextEdit
 
 signal property_edited(property)
@@ -9,9 +9,9 @@ var undo_redo
 var _object_orig_text = ""
 
 func _ready():
-	set_as_toplevel(true)
-	connect("focus_exited", self, "_on_focused_exited")
-	connect("text_changed", self, "_on_text_changed")
+	set_as_top_level(true)
+	connect("focus_exited", _on_focused_exited)
+	connect("text_changed", _on_text_changed)
 	hide()
 
 func _on_text_changed():
@@ -29,7 +29,7 @@ func _on_focused_exited():
 
 # Popup at mouse position
 func popup():
-	if not focused_objects:
+	if focused_objects == null:
 		return
 
 	var focused_object = focused_objects.back()
@@ -37,8 +37,8 @@ func popup():
 		return
 
 	show()
-	rect_global_position = get_viewport().get_mouse_position()
-	rect_size = focused_object.rect_size
+	global_position = get_viewport().get_mouse_position()
+	size = focused_object.size
 	text = focused_object.text
 	grab_focus()
 

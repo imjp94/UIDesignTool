@@ -6,9 +6,9 @@
 bg_color = Color( 1, 1, 1, 0 )
 
 [node name="OverlayTextEdit" type="TextEdit"]
-margin_right = 300.0
-margin_bottom = 200.0
-rect_min_size = Vector2( 300, 200 )
+offset_right = 300.0
+offset_bottom = 200.0
+minimum_size = Vector2( 300, 200 )
 custom_styles/read_only = SubResource( 1 )
 custom_styles/focus = SubResource( 1 )
 custom_styles/normal = SubResource( 1 )

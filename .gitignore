@@ -5,6 +5,7 @@ addons/*
 addons/ui_design_tool/user_pref.cfg
 
 # Godot-specific ignores
+.godot/
 .import/
 export.cfg
 export_presets.cfg
