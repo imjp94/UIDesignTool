@@ -1,4 +1,4 @@
-tool
+@tool
 extends Control
 const Utils = preload("../scripts/Utils.gd")
 const FontManager = preload("../scripts/FontManager.gd")
@@ -10,65 +10,91 @@ const CONFIG_DIR = "res://addons/ui_design_tool/user_pref.cfg" # Must be abosult
 const CONFIG_SECTION_META = "path"
 const CONFIG_KEY_FONTS_DIR = "fonts_dir" # Directory to fonts resource
 # Generic font properties
-const PROPERTY_FONT_COLOR = "custom_colors/font_color"
-const PROPERTY_FONT = "custom_fonts/font"
+const PROPERTY_FONT_COLOR = "theme_override_colors/font_color"
+const PROPERTY_FONT = "theme_override_fonts/font"
+const PROPERTY_FONT_SIZE = "theme_override_font_sizes/font_size"
 # RichTextLabel font properties
-const PROPERTY_FONT_NORMAL = "custom_fonts/normal_font"
-const PROPERTY_FONT_BOLD = "custom_fonts/bold_font"
-const PROPERTY_FONT_ITALIC = "custom_fonts/italics_font"
-const PROPERTY_FONT_BOLD_ITALIC = "custom_fonts/bold_italics_font"
-const PROPERTY_FONT_COLOR_DEFAULT = "custom_colors/default_color"
+const PROPERTY_FONT_NORMAL = "theme_override_fonts/normal_font"
+const PROPERTY_FONT_BOLD = "theme_override_fonts/bold_font"
+const PROPERTY_FONT_ITALIC = "theme_override_fonts/italics_font"
+const PROPERTY_FONT_BOLD_ITALIC = "theme_override_fonts/bold_italics_font"
+const PROPERTY_FONT_COLOR_DEFAULT = "theme_override_colors/default_color"
 # Others generic properties
-const PROPERTY_HIGHLIGHT = "custom_styles/normal"
-const PROPERTY_HIGHLIGHT_PANEL = "custom_styles/panel"
-const PROPERTY_ALIGN = "align"
-const PROPERTY_VALIGN = "valign"
+const PROPERTY_HIGHLIGHT = "theme_override_styles/normal"
+const PROPERTY_HIGHLIGHT_PANEL = "theme_override_styles/panel"
+const PROPERTY_HORIZONTAL_ALIGNMENT = "horizontal_alignment"
+const PROPERTY_VERTICAL_ALIGNMENT = "vertical_alignment"
 
 const DEFAULT_FONT_SIZE = 16
 const FONT_FAMILY_REFERENCE_STRING = "____________" # Reference text to calculate display size of FontFamily
 const FONT_FORMATTING_REFERENCE_STRING = "HEADING_1_" # Reference text to calculate display size of FontFormatting
 
+# Toolbar UI
+@onready var FontFamily = $FontFamily
+@onready var FontFamilyOptions = $FontFamilyOptions
+@onready var FontFamilyOptionsPopupMenu = $FontFamilyOptions/PopupMenu
+@onready var FontFamilyFileDialog = $FontFamilyFileDialog
+@onready var FontSize = $FontSize
+@onready var FontSizePreset = $FontSize/FontSizePreset
+@onready var Bold = $Bold
+@onready var BoldPopupMenu = $Bold/PopupMenu
+@onready var Italic = $Italic
+@onready var Underline = $Underline
+@onready var FontColor = $FontColor
+@onready var FontColorColorRect = $FontColor/ColorRect
+@onready var FontColorColorPicker = $FontColor/PopupPanel/ColorPicker
+@onready var FontColorPopupPanel = $FontColor/PopupPanel
+@onready var Highlight = $Highlight
+@onready var HighlightColorRect = $Highlight/ColorRect
+@onready var HighlightColorPicker = $Highlight/PopupPanel/ColorPicker
+@onready var HighlightPopupPanel = $Highlight/PopupPanel
+@onready var HorizontalAlign = $HorizontalAlign
+@onready var HorizontalAlignPopupMenu = $HorizontalAlign/PopupMenu
+@onready var VerticalAlign = $VerticalAlign
+@onready var VerticalAlignPopupMenu = $VerticalAlign/PopupMenu
+@onready var FontFormatting = $FontFormatting
+@onready var Tools = $Tools
+@onready var ToolsPopupMenu = $Tools/PopupMenu
+
 # Reference passed down from EditorPlugin
-var focused_objects = [] setget set_focused_object # Editor editing object
-var focused_property setget set_focused_property # Editor editing property
-var focused_inspector setget set_focused_inspector # Editor editing inspector
+var focused_objects = [] : # Editor editing object
+	set(objs): # focused_objects setter, mainly called from EditorPlugin
+		var has_changed = false
+
+		if not objs.is_empty():
+			if focused_objects.size() == 1 and objs.size() == 1:
+				# Single selection changed
+				has_changed = focused_objects.back() != objs.back()
+			else:
+				has_changed = true
+		else:
+			if not focused_objects.is_empty():
+				has_changed = true
+
+		if has_changed:
+			focused_objects = objs
+			_on_focused_object_changed(focused_objects)
+var focused_property : # Editor editing property
+	set(prop): # focused_property setter, mainly called from EditorPlugin
+		if focused_property != prop:
+			focused_property = prop
+			_on_focused_property_changed(focused_property)
+var focused_inspector : # Editor editing inspector
+	set(insp): # focused_inspector setter, mainly called from EditorPlugin
+		if focused_inspector != insp:
+			focused_inspector = insp
+			_on_focused_inspector_changed(focused_inspector)
 var undo_redo
 
 var selected_font_root_dir = "res://"
 var font_manager = FontManager.new() # Manager of loaded fonts from fonts_dir
 var config = ConfigFile.new() # Config file of user preference
 
-# Toolbar UI
-onready var FontFamily = $FontFamily
-onready var FontFamilyOptions = $FontFamilyOptions
-onready var FontFamilyOptionsPopupMenu = $FontFamilyOptions/PopupMenu
-onready var FontFamilyFileDialog = $FontFamilyFileDialog
-onready var FontSize = $FontSize
-onready var FontSizePreset = $FontSize/FontSizePreset
-onready var Bold = $Bold
-onready var BoldPopupMenu = $Bold/PopupMenu
-onready var Italic = $Italic
-onready var Underline = $Underline
-onready var FontColor = $FontColor
-onready var FontColorColorRect = $FontColor/ColorRect
-onready var FontColorColorPicker = $FontColor/PopupPanel/ColorPicker
-onready var FontColorPopupPanel = $FontColor/PopupPanel
-onready var Highlight = $Highlight
-onready var HighlightColorRect = $Highlight/ColorRect
-onready var HighlightColorPicker = $Highlight/PopupPanel/ColorPicker
-onready var HighlightPopupPanel = $Highlight/PopupPanel
-onready var HorizontalAlign = $HorizontalAlign
-onready var HorizontalAlignPopupMenu = $HorizontalAlign/PopupMenu
-onready var VerticalAlign = $VerticalAlign
-onready var VerticalAlignPopupMenu = $VerticalAlign/PopupMenu
-onready var FontFormatting = $FontFormatting
-onready var Tools = $Tools
-onready var ToolsPopupMenu = $Tools/PopupMenu
-
 var _is_visible_yet = false # Always True after it has visible once, mainly used to auto load fonts
-var _object_orig_font_color = Color.white # Font color of object when FontColor pressed
+var _object_orig_font_color = Color.WHITE # Font color of object when FontColor pressed
 var _object_orig_highlight # Highlight(StyleBoxFlat) when Highlight pressed
 var _object_orig_font_formatting # FontManager.FontFormatting object when FontFormatting item selected
+
 
 func _init():
 	var result = config.load(CONFIG_DIR)
@@ -81,54 +107,55 @@ func _init():
 
 func _ready():
 	hide()
-	connect("visibility_changed", self, "_on_visibility_changed")
+	connect("visibility_changed", _on_visibility_changed)
 	# FontFamily
 	FontFamily.clip_text = true
-	FontFamily.rect_min_size.x = Utils.get_option_button_display_size(FontFamily, FONT_FAMILY_REFERENCE_STRING).x 
-	FontFamily.connect("item_selected", self, "_on_FontFamily_item_selected")
-	FontFamilyOptions.connect("pressed", self, "_on_FontFamilyOptions_pressed")
-	FontFamilyOptionsPopupMenu.connect("id_pressed", self, "_on_FontFamilyOptionsPopupMenu_id_pressed")
-	FontFamilyFileDialog.connect("dir_selected", self, "_on_FontFamilyFileDialog_dir_selected")
+	FontFamily.custom_minimum_size.x = Utils.get_option_button_display_size(FontFamily, FONT_FAMILY_REFERENCE_STRING).x 
+	FontFamily.connect("item_selected", _on_FontFamily_item_selected)
+	FontFamilyOptions.connect("pressed", _on_FontFamilyOptions_pressed)
+	FontFamilyOptionsPopupMenu.connect("id_pressed", _on_FontFamilyOptionsPopupMenu_id_pressed)
+	FontFamilyFileDialog.connect("dir_selected", _on_FontFamilyFileDialog_dir_selected)
 	# FontSize
-	FontSizePreset.connect("item_selected", self, "_on_FontSizePreset_item_selected")
-	FontSize.connect("text_entered", self, "_on_FontSize_text_entered")
+	FontSizePreset.connect("item_selected", _on_FontSizePreset_item_selected)
+	FontSize.connect("text_submitted", _on_FontSize_text_entered)
 	# Bold
-	Bold.connect("pressed", self, "_on_Bold_pressed")
-	BoldPopupMenu.connect("id_pressed", self, "_on_BoldPopupMenu_id_pressed")
+	Bold.connect("pressed", _on_Bold_pressed)
+	BoldPopupMenu.connect("id_pressed", _on_BoldPopupMenu_id_pressed)
 	# Italic
-	Italic.connect("pressed", self, "_on_Italic_pressed")
+	Italic.connect("pressed", _on_Italic_pressed)
 	# FontColor
-	FontColor.connect("pressed", self, "_on_FontColor_pressed")
-	FontColorColorPicker.connect("color_changed", self, "_on_FontColor_ColorPicker_color_changed")
-	FontColorPopupPanel.connect("popup_hide", self, "_on_FontColor_PopupPanel_popup_hide")
+	FontColor.connect("pressed", _on_FontColor_pressed)
+	FontColorColorPicker.connect("color_changed", _on_FontColor_ColorPicker_color_changed)
+	FontColorPopupPanel.connect("popup_hide", _on_FontColor_PopupPanel_popup_hide)
 	# Highlight
-	Highlight.connect("pressed", self, "_on_Highlight_pressed")
-	HighlightColorPicker.connect("color_changed", self, "_on_Highlight_ColorPicker_color_changed")
-	HighlightPopupPanel.connect("popup_hide", self, "_on_Highlight_PopupPanel_popup_hide")
+	Highlight.connect("pressed", _on_Highlight_pressed)
+	HighlightColorPicker.connect("color_changed", _on_Highlight_ColorPicker_color_changed)
+	HighlightPopupPanel.connect("popup_hide", _on_Highlight_PopupPanel_popup_hide)
 	# HorizontalAlign
-	HorizontalAlign.connect("pressed", self, "_on_HorizontalAlign_pressed")
-	HorizontalAlignPopupMenu.connect("id_pressed", self, "_on_HorizontalAlignPopupMenu_id_pressed")
-	HorizontalAlignPopupMenu.set_item_metadata(0, Label.ALIGN_LEFT)
-	HorizontalAlignPopupMenu.set_item_metadata(1, Label.ALIGN_CENTER)
-	HorizontalAlignPopupMenu.set_item_metadata(2, Label.ALIGN_RIGHT)
+	HorizontalAlign.connect("pressed", _on_HorizontalAlign_pressed)
+	HorizontalAlignPopupMenu.connect("id_pressed", _on_HorizontalAlignPopupMenu_id_pressed)
+	HorizontalAlignPopupMenu.set_item_metadata(0, HORIZONTAL_ALIGNMENT_LEFT)
+	HorizontalAlignPopupMenu.set_item_metadata(1, HORIZONTAL_ALIGNMENT_CENTER)
+	HorizontalAlignPopupMenu.set_item_metadata(2, HORIZONTAL_ALIGNMENT_RIGHT)
 	# VerticalAlign
-	VerticalAlign.connect("pressed", self, "_on_VerticalAlign_pressed")
-	VerticalAlignPopupMenu.connect("id_pressed", self, "_on_VerticalAlignPopupMenu_id_pressed")
-	VerticalAlignPopupMenu.set_item_metadata(0, Label.VALIGN_TOP)
-	VerticalAlignPopupMenu.set_item_metadata(1, Label.VALIGN_CENTER)
-	VerticalAlignPopupMenu.set_item_metadata(2, Label.VALIGN_BOTTOM)
+	VerticalAlign.connect("pressed", _on_VerticalAlign_pressed)
+	VerticalAlignPopupMenu.connect("id_pressed", _on_VerticalAlignPopupMenu_id_pressed)
+	VerticalAlignPopupMenu.set_item_metadata(0, VERTICAL_ALIGNMENT_TOP)
+	VerticalAlignPopupMenu.set_item_metadata(1, VERTICAL_ALIGNMENT_CENTER)
+	VerticalAlignPopupMenu.set_item_metadata(2, VERTICAL_ALIGNMENT_BOTTOM)
 	# FontFormatting
 	FontFormatting.clip_text = true
-	FontFormatting.rect_min_size.x = Utils.get_option_button_display_size(FontFormatting, FONT_FORMATTING_REFERENCE_STRING).x
-	FontFormatting.connect("item_selected", self, "_on_FontFormatting_item_selected")
+	FontFormatting.custom_minimum_size.x = Utils.get_option_button_display_size(FontFormatting, FONT_FORMATTING_REFERENCE_STRING).x
+	FontFormatting.connect("item_selected", _on_FontFormatting_item_selected)
 	# Tools
-	Tools.connect("pressed", self, "_on_Tools_pressed")
-	ToolsPopupMenu.connect("id_pressed", self, "_on_ToolsPopupMenu_id_pressed")
+	Tools.connect("pressed", _on_Tools_pressed)
+	ToolsPopupMenu.connect("id_pressed", _on_ToolsPopupMenu_id_pressed)
 
 func _on_visibility_changed():
 	if not _is_visible_yet and visible:
 		var fonts_dir = config.get_value(CONFIG_SECTION_META, CONFIG_KEY_FONTS_DIR, "")
-		if not fonts_dir.empty():
+		if not fonts_dir.is_empty():
+			FontFamilyFileDialog.current_path = fonts_dir
 			_on_FontFamilyFileDialog_dir_selected(fonts_dir)
 		_is_visible_yet = true
 
@@ -142,7 +169,7 @@ func change_font(object, to):
 
 # Change font data of font object with undo/redo
 func change_font_data(object, to):
-	var from = object.get(PROPERTY_FONT).font_data
+	var from = object.get(PROPERTY_FONT).base_font
 	undo_redo.create_action("Change Font Data")
 	undo_redo.add_do_method(self, "set_font_data", object, to if to else false) # Godot bug, varargs ignore null
 	undo_redo.add_undo_method(self, "set_font_data", object, from if from else false)
@@ -162,7 +189,7 @@ func change_rich_text_fonts(object, to):
 
 # Change font size with undo/redo
 func change_font_size(object, to):
-	var from = object.get(PROPERTY_FONT).size
+	var from = object.get(PROPERTY_FONT_SIZE)
 	undo_redo.create_action("Change Font Size")
 	undo_redo.add_do_method(self, "set_font_size", object, to)
 	undo_redo.add_undo_method(self, "set_font_size", object, from)
@@ -184,19 +211,20 @@ func change_highlight(object, to):
 	undo_redo.add_undo_method(self, "set_highlight", object, from if from else false)
 	undo_redo.commit_action()
 
-# Change align with undo/redo
-func change_align(object, to):
-	var from = object.get(PROPERTY_ALIGN)
-	undo_redo.create_action("Change Align")
-	undo_redo.add_do_method(self, "set_align", object, to)
-	undo_redo.add_undo_method(self, "set_align", object, from)
+# Change horizontal alignment with undo/redo
+func change_horizontal_alignment(object, to):
+	var from = object.get(PROPERTY_HORIZONTAL_ALIGNMENT)
+	undo_redo.create_action("Change Horizontal Alignment")
+	undo_redo.add_do_method(self, "set_horizontal_alignment", object, to)
+	undo_redo.add_undo_method(self, "set_horizontal_alignment", object, from)
 	undo_redo.commit_action()
 
-func change_valign(object, to):
-	var from = object.get(PROPERTY_VALIGN)
-	undo_redo.create_action("Change VAlign")
-	undo_redo.add_do_method(self, "set_valign", object, to)
-	undo_redo.add_undo_method(self, "set_valign", object, from)
+# Change vertical alignment with undo/redo
+func change_vertical_alignment(object, to):
+	var from = object.get(PROPERTY_VERTICAL_ALIGNMENT)
+	undo_redo.create_action("Change Vertical Alignment")
+	undo_redo.add_do_method(self, "set_vertical_alignment", object, to)
+	undo_redo.add_undo_method(self, "set_vertical_alignment", object, from)
 	undo_redo.commit_action()
 
 # Change font style(FontManager.FontFormatting) with undo/redo
@@ -213,20 +241,20 @@ func reflect_font_family_control():
 	if not obj:
 		return
 
-	var dynamic_font = obj.get(PROPERTY_FONT) if obj else null
-	if dynamic_font:
-		if dynamic_font.font_data:
-			var font_face = font_manager.get_font_face(dynamic_font.font_data)
+	var font_variation = obj.get(PROPERTY_FONT) if obj else null
+	if font_variation:
+		if font_variation.base_font:
+			var font_face = font_manager.get_font_face(font_variation.base_font)
 			if font_face:
 				for i in FontFamily.get_item_count():
 					var font_family_name = FontFamily.get_item_text(i)
 					if font_family_name == font_face.font_family:
-						FontFamily.hint_tooltip = font_family_name
+						FontFamily.tooltip_text = font_family_name
 						FontFamily.selected = i
 						reflect_font_weight_control()
 						return
 	
-	FontFamily.hint_tooltip = "Font Family"
+	FontFamily.tooltip_text = "Font Family"
 	reset_font_family_control()
 
 # Reflect font weight of focused_objects to toolbar, always call reflect_font_family_control first
@@ -235,16 +263,16 @@ func reflect_font_weight_control():
 	if not obj:
 		return
 
-	var dynamic_font = obj.get(PROPERTY_FONT) if obj else null
-	if dynamic_font:
-		if dynamic_font.font_data:
-			var font_face = font_manager.get_font_face(dynamic_font.font_data)
+	var font_variation = obj.get(PROPERTY_FONT) if obj else null
+	if font_variation:
+		if font_variation.base_font:
+			var font_face = font_manager.get_font_face(font_variation.base_font)
 			if font_face:
 				var font_weight = font_face.font_weight
 
 				for i in BoldPopupMenu.get_item_count():
 					if font_weight.replace("-", "_") == BoldPopupMenu.get_item_text(i).to_lower().replace("-", "_"):
-						Bold.hint_tooltip = BoldPopupMenu.get_item_text(i)
+						Bold.tooltip_text = BoldPopupMenu.get_item_text(i)
 						return true
 	return false
 
@@ -254,13 +282,16 @@ func reflect_font_size_control():
 	if not obj:
 		return
 
-	var dynamic_font = obj.get(PROPERTY_FONT) if obj else null
-	FontSize.text = str(dynamic_font.size) if dynamic_font else str(DEFAULT_FONT_SIZE)
-	FontSize.mouse_filter = Control.MOUSE_FILTER_IGNORE if dynamic_font == null else Control.MOUSE_FILTER_STOP
-	var font_size_color = Color.white
-	font_size_color.a = 0.5 if dynamic_font == null else 1
+	var has_font_size = PROPERTY_FONT_SIZE in obj
+	FontSize.mouse_filter = Control.MOUSE_FILTER_IGNORE if not has_font_size else Control.MOUSE_FILTER_STOP
+	FontSizePreset.disabled = not has_font_size
+	var font_size_color = Color.WHITE
+	font_size_color.a = 0.5 if not has_font_size else 1
 	FontSize.set(PROPERTY_FONT_COLOR, font_size_color)
-	FontSizePreset.disabled = dynamic_font == null
+	var font_size = obj.get(PROPERTY_FONT_SIZE) if obj else null
+	if has_font_size and font_size == null:
+		font_size = DEFAULT_FONT_SIZE
+	FontSize.text = str(font_size) if font_size else str(DEFAULT_FONT_SIZE)
 
 # Reflect bold/italic of focused_objects to toolbar, always call reflect_font_family_control first
 func reflect_bold_italic_control():
@@ -270,17 +301,17 @@ func reflect_bold_italic_control():
 
 	if FontFamily.get_item_count():
 		var font_family_name = FontFamily.get_item_text(FontFamily.selected)
-		# TODO: Better way to get current item text from PopupMenu than hint_tooltip
-		var font_weight = Bold.hint_tooltip.to_lower().replace("-", "_")
+		# TODO: Better way to get current item text from PopupMenu than tooltip_text
+		var font_weight = Bold.tooltip_text.to_lower().replace("-", "_")
 		var font_family = font_manager.get_font_family(font_family_name)
 
 		Bold.disabled = font_family == null
-		var dynamic_font = obj.get(PROPERTY_FONT) if obj else null
-		if dynamic_font:
-			var font_face = font_manager.get_font_face(dynamic_font.font_data)
+		var font_variation = obj.get(PROPERTY_FONT) if obj else null
+		if font_variation:
+			var font_face = font_manager.get_font_face(font_variation.base_font)
 			if font_face:
 				var is_italic = font_face.font_style == FontManager.FONT_STYLE.ITALIC
-				Italic.pressed = is_italic
+				Italic.button_pressed = is_italic
 				if not is_italic:
 					if font_family:
 						Italic.disabled = not ("italic" in font_family.get(font_weight))
@@ -289,7 +320,7 @@ func reflect_bold_italic_control():
 				else:
 					Italic.disabled = false
 		else:
-			Italic.pressed = false
+			Italic.button_pressed = false
 			Italic.disabled = true
 
 		var is_none = font_family_name == "None"
@@ -301,8 +332,8 @@ func reflect_bold_italic_control():
 	else:
 		Bold.disabled = true
 		Italic.disabled = true
-		Bold.pressed = false
-		Italic.pressed = false
+		Bold.button_pressed = false
+		Italic.button_pressed = false
 
 # Reflect font color of focused_objects to toolbar
 func reflect_font_color_control():
@@ -311,7 +342,7 @@ func reflect_font_color_control():
 		return
 
 	var focused_object_font_color = obj.get(PROPERTY_FONT_COLOR) if obj else null
-	var font_color = Color.white
+	var font_color = Color.WHITE
 	if focused_object_font_color != null:
 		font_color = focused_object_font_color
 	FontColorColorRect.color = font_color
@@ -327,50 +358,50 @@ func reflect_highlight_control():
 	if obj is Panel or obj is PanelContainer:
 		focused_object_highlight = obj.get(PROPERTY_HIGHLIGHT_PANEL) if obj else null
 
-	var highlight_color = Color.white # default modulate color
+	var highlight_color = Color.WHITE # default modulate color
 	if focused_object_highlight != null:
 		if focused_object_highlight is StyleBoxFlat:
 			highlight_color = focused_object_highlight.bg_color
 	HighlightColorRect.color = highlight_color
 	HighlightColorPicker.color = highlight_color
 
-# Reflect horizontal align of focused_objects to toolbar
-func reflect_align_control():
+# Reflect horizontal alignment of focused_objects to toolbar
+func reflect_horizontal_alignment_control():
 	var obj = focused_objects.back() if focused_objects else null
 	if not obj:
 		return
 	
-	var align = obj.get(PROPERTY_ALIGN) if obj else null
-	if align != null:
+	var h_align = obj.get(PROPERTY_HORIZONTAL_ALIGNMENT) if obj else null
+	if h_align != null:
 		var icon
 		HorizontalAlign.disabled = false
-		match align:
-			Label.ALIGN_LEFT:
+		match h_align:
+			HORIZONTAL_ALIGNMENT_LEFT:
 				icon = HorizontalAlignPopupMenu.get_item_icon(0)
-			Label.ALIGN_CENTER:
+			HORIZONTAL_ALIGNMENT_CENTER:
 				icon = HorizontalAlignPopupMenu.get_item_icon(1)
-			Label.ALIGN_RIGHT:
+			HORIZONTAL_ALIGNMENT_RIGHT:
 				icon = HorizontalAlignPopupMenu.get_item_icon(2)
 		if icon:
 			HorizontalAlign.icon = icon
 	else:
 		HorizontalAlign.disabled = true
 
-func reflect_valign_control():
+func reflect_vertical_alignment_control():
 	var obj = focused_objects.back() if focused_objects else null
 	if not obj:
 		return
 
-	var valign = obj.get(PROPERTY_VALIGN) if obj else null
-	if valign != null:
+	var v_align = obj.get(PROPERTY_VERTICAL_ALIGNMENT) if obj else null
+	if v_align != null:
 		var icon
 		VerticalAlign.disabled = false
-		match valign:
-			Label.VALIGN_TOP:
+		match v_align:
+			VERTICAL_ALIGNMENT_TOP:
 				icon = VerticalAlignPopupMenu.get_item_icon(0)
-			Label.VALIGN_CENTER:
+			VERTICAL_ALIGNMENT_CENTER:
 				icon = VerticalAlignPopupMenu.get_item_icon(1)
-			Label.VALIGN_BOTTOM:
+			VERTICAL_ALIGNMENT_BOTTOM:
 				icon = VerticalAlignPopupMenu.get_item_icon(2)
 		if icon:
 			VerticalAlign.icon = icon
@@ -384,8 +415,8 @@ func reflect_font_formatting_control():
 		return
 	
 	# Font Style is not required to be accurate
-	var dynamic_font = obj.get(PROPERTY_FONT) if obj else null
-	FontFormatting.disabled = dynamic_font == null
+	var font_variation = obj.get(PROPERTY_FONT) if obj else null
+	FontFormatting.disabled = font_variation == null
 
 # Reset font name on toolbar
 func reset_font_family_control():
@@ -393,7 +424,7 @@ func reset_font_family_control():
 		FontFamily.selected = FontFamily.get_item_count() - 1
 
 func _on_FontFamily_item_selected(index):
-	if not focused_objects:
+	if focused_objects == null:
 		return
 
 	var font_family_name = FontFamily.get_item_text(index)
@@ -414,11 +445,11 @@ func _on_FontFamily_item_selected(index):
 			to["bold_italic"] = create_new_font_obj(font_family.bold.italic.data) if font_family.bold.get("italic") else null
 			change_rich_text_fonts(obj, to)
 		else:
-			var dynamic_font = obj.get(PROPERTY_FONT)
-			if not dynamic_font:
-				var font_size = int(FontSizePreset.get_item_text(FontSizePreset.selected))
-				dynamic_font = create_new_font_obj(font_family.regular.normal.data,  font_size)
-				change_font(obj, dynamic_font)
+			var font_variation = obj.get(PROPERTY_FONT)
+			if not font_variation:
+				var font_size = FontSizePreset.get_item_text(FontSizePreset.selected).to_int()
+				font_variation = create_new_font_obj(font_family.regular.normal.data)
+				change_font(obj, font_variation)
 			else:
 				change_font_data(obj, font_family.regular.normal.data) # TODO: Get fallback weight if regular not found
 
@@ -430,7 +461,7 @@ func _on_FontFamilyOptions_pressed():
 func _on_FontFamilyOptionsPopupMenu_id_pressed(index):
 	match index:
 		0:
-			FontFamilyFileDialog.popup_centered()
+			FontFamilyFileDialog.popup_centered(Vector2(600, 400))
 		1:
 			_on_FontFamilyFileDialog_dir_selected(selected_font_root_dir)
 
@@ -450,54 +481,54 @@ func _on_FontFamilyFileDialog_dir_selected(dir):
 		print("Failed to load fonts")
 
 func _on_FontSizePreset_item_selected(index):
-	if not focused_objects:
+	if focused_objects == null:
 		return
 	
 	for obj in focused_objects:
 		var new_font_size_str = FontSizePreset.get_item_text(index)
-		change_font_size(obj, int(new_font_size_str))
+		change_font_size(obj, new_font_size_str.to_int())
 
 func _on_FontSize_text_entered(new_text):
-	if not focused_objects:
+	if focused_objects == null:
 		return
 	
 	for obj in focused_objects:
-		change_font_size(obj, int(FontSize.text))
+		change_font_size(obj, FontSize.text.to_int())
 
 func _on_Bold_pressed():
-	if not focused_objects:
+	if focused_objects == null:
 		return
 
 	Utils.popup_on_target(BoldPopupMenu, Bold)
 
 func _on_BoldPopupMenu_id_pressed(index):
-	if not focused_objects:
+	if focused_objects == null:
 		return
 
 	var font_weight_text = BoldPopupMenu.get_item_text(index)
-	if font_weight_text == Bold.hint_tooltip:
+	if font_weight_text == Bold.tooltip_text:
 		return
 
-	Bold.hint_tooltip = font_weight_text
+	Bold.tooltip_text = font_weight_text
 	var font_family_name = FontFamily.get_item_text(FontFamily.selected)
-	var font_weight = Bold.hint_tooltip .to_lower().replace("-", "_")
+	var font_weight = Bold.tooltip_text.to_lower().replace("-", "_")
 	var font_family = font_manager.get_font_family(font_family_name)
 
 	for obj in focused_objects:
 		if obj is RichTextLabel:
 			continue
-		var dynamic_font = obj.get(PROPERTY_FONT)
-		if dynamic_font:
+		var font_variation = obj.get(PROPERTY_FONT)
+		if font_variation:
 			var font_faces = font_family.get(font_weight)
 			var font_face = font_faces.normal
-			if Italic.pressed:
+			if Italic.button_pressed:
 				if font_faces.has("italic"):
 					font_face = font_faces.italic
 			var font_data = font_face.data
 			change_font_data(obj, font_data)
 
 func _on_Italic_pressed():
-	if not focused_objects:
+	if focused_objects == null:
 		return
 
 	var font_family_name = FontFamily.get_item_text(FontFamily.selected)
@@ -505,15 +536,15 @@ func _on_Italic_pressed():
 	if not font_family:
 		return
 	
-	var font_weight = Bold.hint_tooltip.to_lower().replace("-", "_")
+	var font_weight = Bold.tooltip_text.to_lower().replace("-", "_")
 	var font_faces = font_family.get(font_weight)
-	var font_face = font_faces.get("italic") if Italic.pressed else font_faces.normal
+	var font_face = font_faces.get("italic") if Italic.button_pressed else font_faces.normal
 	
 	for obj in focused_objects:
 		change_font_data(obj, font_face.data)
 
 func _on_FontColor_pressed():
-	if not focused_objects:
+	if focused_objects == null:
 		return
 
 	Utils.popup_on_target(FontColorPopupPanel, FontColor)
@@ -525,7 +556,7 @@ func _on_FontColor_pressed():
 		_object_orig_font_color = obj.get(PROPERTY_FONT_COLOR) 
 
 func _on_FontColor_ColorPicker_color_changed(color):
-	if not focused_objects:
+	if focused_objects == null:
 		return
 
 	for obj in focused_objects:
@@ -537,7 +568,7 @@ func _on_FontColor_ColorPicker_color_changed(color):
 		FontColorColorRect.color = FontColorColorPicker.color
 
 func _on_FontColor_PopupPanel_popup_hide():
-	if not focused_objects:
+	if focused_objects == null:
 		return
 
 	for obj in focused_objects:
@@ -549,7 +580,7 @@ func _on_FontColor_PopupPanel_popup_hide():
 		change_font_color(obj, font_color)
 
 func _on_Highlight_pressed():
-	if not focused_objects:
+	if focused_objects == null:
 		return
 
 	Utils.popup_on_target(HighlightPopupPanel, Highlight)
@@ -565,7 +596,7 @@ func _on_Highlight_pressed():
 			_object_orig_highlight = null
 
 func _on_Highlight_ColorPicker_color_changed(color):
-	if not focused_objects:
+	if focused_objects == null:
 		return
 
 	# Preview only, doesn't stack undo/redo as this is called very frequently
@@ -581,7 +612,7 @@ func _on_Highlight_ColorPicker_color_changed(color):
 			obj.set(PROPERTY_HIGHLIGHT, style_box_flat)
 
 func _on_Highlight_PopupPanel_popup_hide():
-	if not focused_objects:
+	if focused_objects == null:
 		return
 
 	for obj in focused_objects:
@@ -603,45 +634,45 @@ func _on_HorizontalAlign_pressed():
 		Utils.popup_on_target(HorizontalAlignPopupMenu, HorizontalAlign)
 
 func _on_HorizontalAlignPopupMenu_id_pressed(index):
-	if not focused_objects:
+	if focused_objects == null:
 		return
 
 	for obj in focused_objects:
 		HorizontalAlign.icon = HorizontalAlignPopupMenu.get_item_icon(index)
 		var selected_align = HorizontalAlignPopupMenu.get_item_metadata(index)
-		var current_align = obj.get(PROPERTY_ALIGN)
+		var current_align = obj.get(PROPERTY_HORIZONTAL_ALIGNMENT)
 		if current_align != selected_align:
-			change_align(obj, selected_align)
+			change_horizontal_alignment(obj, selected_align)
 
 func _on_VerticalAlign_pressed():
 	if focused_objects:
 		Utils.popup_on_target(VerticalAlignPopupMenu, VerticalAlign)
 
 func _on_VerticalAlignPopupMenu_id_pressed(index):
-	if not focused_objects:
+	if focused_objects == null:
 		return
 
 	for obj in focused_objects:
 		VerticalAlign.icon = VerticalAlignPopupMenu.get_item_icon(index)
-		var selected_valign = VerticalAlignPopupMenu.get_item_metadata(index)
-		var current_valign = obj.get(PROPERTY_VALIGN)
-		if current_valign != selected_valign:
-			change_valign(obj, selected_valign)
+		var selected_v_align = VerticalAlignPopupMenu.get_item_metadata(index)
+		var current_v_align = obj.get(PROPERTY_VERTICAL_ALIGNMENT)
+		if current_v_align != selected_v_align:
+			change_vertical_alignment(obj, selected_v_align)
 
 func _on_FontFormatting_item_selected(index):
-	if not focused_objects:
+	if focused_objects == null:
 		return
 
-	var dynamic_font = focused_objects.back().get(PROPERTY_FONT)
-	if not dynamic_font:
+	var font_variation = focused_objects.back().get(PROPERTY_FONT)
+	if not font_variation:
 		return
 
 	var font_formatting_name = FontFormatting.get_item_text(index)
 	var font_formatting = font_manager.FONT_FORMATTINGS[font_formatting_name]
-	FontFormatting.hint_tooltip = font_formatting_name
-	# TODO: Better way to get current item text from PopupMenu than hint_tooltip
+	FontFormatting.tooltip_text = font_formatting_name
+	# TODO: Better way to get current item text from PopupMenu than tooltip_text
 	_object_orig_font_formatting= FontManager.FontFormatting.new(
-		Bold.hint_tooltip.to_lower().replace("-", "_"), dynamic_font.size, dynamic_font.extra_spacing_char)
+		Bold.tooltip_text.to_lower().replace("-", "_"), DEFAULT_FONT_SIZE, font_variation.spacing_glyph)
 
 	for obj in focused_objects:
 		change_font_formatting(obj, font_formatting)
@@ -651,7 +682,7 @@ func _on_Tools_pressed():
 		Utils.popup_on_target(ToolsPopupMenu, Tools)
 
 func _on_ToolsPopupMenu_id_pressed(index):
-	if not focused_objects:
+	if focused_objects == null:
 		return
 
 	match index:
@@ -663,7 +694,7 @@ func _on_ToolsPopupMenu_id_pressed(index):
 			_on_RectSizeRefresh_pressed()
 
 func _on_FontClear_pressed():
-	if not focused_objects:
+	if focused_objects == null:
 		return
 
 	for obj in focused_objects:
@@ -681,7 +712,7 @@ func _on_FontClear_pressed():
 	_on_focused_object_changed(focused_objects) # Update ui default state
 
 func _on_ColorClear_pressed():
-	if not focused_objects:
+	if focused_objects == null:
 		return
 
 	for obj in focused_objects:
@@ -700,7 +731,7 @@ func _on_ColorClear_pressed():
 func _on_RectSizeRefresh_pressed():
 	if focused_objects:
 		for obj in focused_objects:
-			obj.set("rect_size", Vector2.ZERO)
+			obj.set("size", Vector2.ZERO)
 
 # focused_objects changed when user select different object in editor
 func _on_focused_object_changed(new_focused_object):	
@@ -709,8 +740,8 @@ func _on_focused_object_changed(new_focused_object):
 	reflect_font_color_control()
 	reflect_highlight_control()
 	reflect_bold_italic_control()
-	reflect_align_control()
-	reflect_valign_control()
+	reflect_horizontal_alignment_control()
+	reflect_vertical_alignment_control()
 	reflect_font_formatting_control()
 	
 # focused_property changed when user select different property in inspector
@@ -737,7 +768,7 @@ func _on_font_changed(new_font):
 	if not new_font:
 		reset_font_family_control()
 	else:
-		var font_face = font_manager.get_font_face(new_font.font_data)
+		var font_face = font_manager.get_font_face(new_font.base_font)
 		if font_face:
 			reflect_font_family_control()
 			reflect_font_weight_control()
@@ -757,7 +788,7 @@ func _on_font_size_changed(new_font_size):
 	var new_font_size_str = str(new_font_size)
 	FontSize.text = new_font_size_str
 
-	emit_signal("property_edited", PROPERTY_FONT)
+	emit_signal("property_edited", PROPERTY_FONT_SIZE)
 
 # Called from setter method, handle update of font color in toolbar
 func _on_font_color_changed(new_font_color):
@@ -774,21 +805,22 @@ func _on_highlight_changed(new_highlight):
 	else:
 		emit_signal("property_edited", PROPERTY_HIGHLIGHT)
 
-# Called from setter method, handle update of align in toolbar
-func _on_align_changed(align):
-	reflect_align_control()
+# Called from setter method, handle update of horizontal alignment in toolbar
+func _on_horizontal_alignment_changed(h_align):
+	reflect_horizontal_alignment_control()
 
-	emit_signal("property_edited", PROPERTY_ALIGN)
+	emit_signal("property_edited", PROPERTY_HORIZONTAL_ALIGNMENT)
 
-func _on_valign_changed(valing):
-	reflect_valign_control()
+# Called from setter method, handle update of vertical alignment in toolbar
+func _on_vertical_alignment_changed(v_align):
+	reflect_vertical_alignment_control()
 
-	emit_signal("property_edited", PROPERTY_VALIGN)
+	emit_signal("property_edited", PROPERTY_VERTICAL_ALIGNMENT)
 
 # font data setter, toolbar gets updated after called
 func set_font_data(object, font_data):
 	font_data = font_data if font_data else null # font might be bool false, as Godot ignore null for varargs
-	object.get(PROPERTY_FONT).font_data = font_data
+	object.get(PROPERTY_FONT).base_font = font_data
 	_on_font_data_changed(font_data)
 
 # font setter, toolbar gets updated after called
@@ -807,7 +839,7 @@ func set_rich_text_fonts(object, fonts):
 
 # font size setter, toolbar gets updated after called
 func set_font_size(object, font_size):
-	object.get(PROPERTY_FONT).size = font_size
+	object.set(PROPERTY_FONT_SIZE, font_size)
 	_on_font_size_changed(font_size)
 
 # font color setter, toolbar gets updated after called
@@ -828,14 +860,15 @@ func set_highlight(object, highlight):
 		object.set(PROPERTY_HIGHLIGHT, highlight)
 	_on_highlight_changed(highlight)
 
-# align setter, toolbar gets updated after called
-func set_align(object, align):
-	object.set(PROPERTY_ALIGN, align)
-	_on_align_changed(align)
+# Horizontal alignment setter, toolbar gets updated after called
+func set_horizontal_alignment(object, h_align):
+	object.set(PROPERTY_HORIZONTAL_ALIGNMENT, h_align)
+	_on_horizontal_alignment_changed(h_align)
 
-func set_valign(object, valign):
-	object.set(PROPERTY_VALIGN, valign)
-	_on_valign_changed(valign)
+# Vertical alignment setter, toolbar gets updated after called
+func set_vertical_alignment(object, v_align):
+	object.set(PROPERTY_VERTICAL_ALIGNMENT, v_align)
+	_on_vertical_alignment_changed(v_align)
 
 # font style setter, toolbar gets updated after called
 func set_font_formatting(object, font_formatting):
@@ -849,51 +882,18 @@ func set_font_formatting(object, font_formatting):
 		font_data = font_face.data
 	else:
 		# Use current weight if desired weight not found
-		font_data = object.get(PROPERTY_FONT).font_data
+		font_data = object.get(PROPERTY_FONT).base_font
 	set_font_data(object, font_data)
 	set_font_size(object, font_formatting.size)
 	set_font_extra_spacing_char(object, font_formatting.letter_spacing)
 
 # font letter spacing setter, toolbar gets updated after called
 func set_font_extra_spacing_char(object, new_spacing):
-	object.get(PROPERTY_FONT).extra_spacing_char = new_spacing
+	object.get(PROPERTY_FONT).spacing_glyph = new_spacing
 	# TODO: Add gui for font extra spacing
-
-# focused_objects setter, mainly called from EditorPlugin
-func set_focused_object(objs):
-	var has_changed = false
-
-	if not objs.empty():
-		if focused_objects.size() == 1 and objs.size() == 1:
-			# Single selection changed
-			has_changed = focused_objects.back() != objs.back()
-		else:
-			has_changed = true
-	else:
-		if not focused_objects.empty():
-			has_changed = true
-
-	if has_changed:
-		focused_objects = objs
-		_on_focused_object_changed(focused_objects)
-
-# focused_property setter, mainly called from EditorPlugin
-func set_focused_property(prop):
-	if focused_property != prop:
-		focused_property = prop
-		_on_focused_property_changed(focused_property)
-
-# focused_inspector setter, mainly called from EditorPlugin
-func set_focused_inspector(insp):
-	if focused_inspector != insp:
-		focused_inspector = insp
-		_on_focused_inspector_changed(focused_inspector)
 
 # Convenience method to create font object with some default settings
 func create_new_font_obj(font_data, size=null):
-	var font  = DynamicFont.new()
-	font.use_filter = true
-	font.font_data = font_data
-	if size:
-		font.size = size
-	return font
+	var font_variation = FontVariation.new()
+	font_variation.base_font = font_data
+	return font_variation
