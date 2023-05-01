@@ -6,6 +6,8 @@ Intuitive UI design workflow in Godot.
 
 Import/manage font source files and styling UI directly in the editor viewport.
 
+> This version is only compatible with **Godot 4.x**, check out [godot3](https://github.com/imjp94/UIDesignTool/tree/godot3) branch for older version
+
 ## Features
 
 - Overlay Text Editor
@@ -35,6 +37,14 @@ or
 - Download this respository,
   1. Move `addons/ui_design_tool` to your `{project_dir}`
   2. Enable it from Project -> Settings -> Plugins
+
+or
+
+Install with [gd-plug](https://github.com/imjp94/gd-plug)
+
+```gdscript
+plug("imjp94/UIDesignTool")
+```
 
 ## Usage
 
